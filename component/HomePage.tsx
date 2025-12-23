@@ -5,18 +5,45 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { months, years } from "@/const/monthArray";
+import { useUser } from "@/provider/AuthContext";
+import { logout } from "@/service/auth";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { getDaysInMonth } from "date-fns";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const HomePage = () => {
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const daysInMonth = getDaysInMonth(new Date(year, month));
+  const router = useRouter();
+
+  const { user, setUser, setIsLoading } = useUser();
+
+  const handleLogOut = async () => {
+    const toastId = toast.loading("Logging out...", { duration: 3000 });
+    try {
+      const res = await logout();
+      if (res.success) {
+        setIsLoading(true);
+        setUser(null);
+        router.push("/login");
+        toast.success(res.message, { id: toastId, duration: 3000 });
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error("An error occurred during logout.", {
+        id: toastId,
+        duration: 3000,
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -68,12 +95,18 @@ const HomePage = () => {
           </DropdownMenu>
         </div>
         <div className="flex items-center gap-6">
-          <button className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
-            <Link href="/login">Login</Link>
-          </button>
-          <button className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
-            <Link href="/register">Register</Link>
-          </button>
+          {user ? (
+            <button
+              onClick={handleLogOut}
+              className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base"
+            >
+              Logout
+            </button>
+          ) : (
+            <button className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
+              <Link href="/login">Login</Link>
+            </button>
+          )}
         </div>
       </div>
 

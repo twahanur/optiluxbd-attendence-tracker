@@ -1,12 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUser } from "@/provider/AuthContext";
+import { loginUser } from "@/service/auth";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type TLoginData = {
   identifier: string;
@@ -14,42 +19,41 @@ type TLoginData = {
 };
 const Login = () => {
   const [open, setOpen] = useState(false);
+  const { refetchUser, setIsLoading } = useUser();
+  const router = useRouter();
   const {
     handleSubmit,
     register,
     reset,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<TLoginData>();
 
   const onSubmit = async (data: TLoginData) => {
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.identifier);
-
     const payload = {
-      data: {
-        ...(isEmail ? { email: data.identifier } : { userId: data.identifier }),
-        password: data.password,
-      },
+      ...(isEmail ? { email: data.identifier } : { userId: data.identifier }),
+      password: data.password,
     };
-
-    console.log(payload);
-
-    // try {
-    //   const res = await registration(payload).unwrap();
-    //   if (res?.success) {
-    //     toast.success(res?.message, { duration: 3000 });
-    //     setOpen(true);
-    //     reset();
-    //   }
-    // } catch (error: any) {
-    //   const errorInfo =
-    //     error?.error ||
-    //     error?.data?.errors[0]?.message ||
-    //     error?.data?.message ||
-    //     "Something went wrong!";
-    //   toast.error(errorInfo, { duration: 3000 });
-    // }
+    const toastId = toast.loading("Logging in...");
+    try {
+      const res = await loginUser(payload);
+      if (res?.success) {
+        toast.success(res?.message, { id: toastId, duration: 3000 });
+        setIsLoading(false);
+        await refetchUser();
+        reset();
+        router.push("/");
+      }
+    } catch (error: any) {
+      const errorInfo =
+        error?.error ||
+        error?.data?.errors[0]?.message ||
+        error?.data?.message ||
+        "Something went wrong!";
+      toast.error(errorInfo, { id: toastId, duration: 3000 });
+    }
   };
+
   return (
     <div className="flex items-center justify-center h-full">
       <Card className="w-full max-w-md bg-white/5 text-white">
@@ -101,7 +105,11 @@ const Login = () => {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full bg-white/5 cursor-pointer">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-white/5 cursor-pointer"
+            >
               Login
             </Button>
           </form>

@@ -5,7 +5,7 @@ import { config } from "@/config";
 import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 
-type TLoginData = {
+export type TLoginData = {
   email?: string;
   userId?: string;
   password: string;
@@ -13,7 +13,7 @@ type TLoginData = {
 
 export const loginUser = async (loginData: TLoginData) => {
   try {
-    const res = await fetch(`${config.next_public_base_api}/auth/employees`, {
+    const res = await fetch(`${config.next_public_base_api}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -22,7 +22,7 @@ export const loginUser = async (loginData: TLoginData) => {
     });
     const result = await res.json();
     if (result?.success) {
-      (await cookies()).set("token", result?.data?.refreshToken);
+      (await cookies()).set("authToken", result?.data?.token);
     }
     return result;
   } catch (error: any) {
@@ -31,12 +31,25 @@ export const loginUser = async (loginData: TLoginData) => {
 };
 
 export const getCurrentUser = async () => {
-  const refreshToken = (await cookies()).get("token")?.value;
+  const token = (await cookies()).get("authToken")?.value;
   let decodedData = null;
-  if (refreshToken) {
-    decodedData = await jwtDecode(refreshToken);
+  if (token) {
+    decodedData = await jwtDecode(token);
     return decodedData;
   } else {
     return null;
+  }
+};
+
+export const logout = async (): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  try {
+    (await cookies()).delete("authToken");
+    return { success: true, message: "Logout successful" };
+  } catch (error: any) {
+    console.error("Logout error:", error);
+    return { success: false, message: error?.message || "Logout failed" };
   }
 };
