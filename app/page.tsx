@@ -2,8 +2,11 @@ import HomePage from "@/component/home/HomePage";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { GetStatistics } from "@/service/admin";
 
-const Home = () => {
+const Home = async () => {
+  const res = await GetStatistics();
+  console.log(res);
   return (
     <section className="px-10 py-4">
       <SidebarProvider
