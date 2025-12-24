@@ -4,7 +4,7 @@ import { getCurrentUser, logout } from "./service/auth";
 const authRoutes = ["/login"];
 
 const rolebasedPrivateUser = {
-  employee: [/^\/$/, /^\/profile$/, /^\/settings$/],
+  EMPLOYEE: [/^\/$/, /^\/profile$/, /^\/settings$/],
   ADMIN: [/^\/$/, /^\/profile$/, /^\/settings$/, /^\/user(\/.*)?$/],
 };
 
@@ -13,7 +13,6 @@ type TRole = keyof typeof rolebasedPrivateUser;
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const userInfo = await getCurrentUser();
-  console.log(userInfo);
   if (!userInfo) {
     if (authRoutes.includes(pathname)) {
       return NextResponse.next();

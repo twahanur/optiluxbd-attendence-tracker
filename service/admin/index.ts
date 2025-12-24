@@ -11,6 +11,7 @@ export const GetStatistics = async () => {
       },
     });
     const result = await res.json();
+
     return result;
   } catch (error: any) {
     return Error(error);

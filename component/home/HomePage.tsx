@@ -6,7 +6,6 @@ import AdminHomePage from "./adminHomePage/AdminHomePage";
 
 const HomePage = () => {
   const { user } = useUser();
-
   return (
     <section>
       {user?.role === "EMPLOYEE" && <UserHomePage />}
