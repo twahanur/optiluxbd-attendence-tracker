@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 type TLoginData = {
-  identifier: string;
+  email: string;
   password: string;
 };
 const Login = () => {
@@ -54,6 +54,28 @@ const Login = () => {
     }
   };
 
+  const handleFastLogin = async (data: TLoginData) => {
+    const toastId = toast.loading("Logging in...");
+    try {
+      const res = await loginUser(data);
+
+      if (res?.success) {
+        toast.success(res?.message, { id: toastId, duration: 3000 });
+        setIsLoading(false);
+        await refetchUser();
+        reset();
+        router.push("/");
+      }
+    } catch (error: any) {
+      const errorInfo =
+        error?.error ||
+        error?.data?.errors[0]?.message ||
+        error?.data?.message ||
+        "Something went wrong!";
+      toast.error(errorInfo, { id: toastId, duration: 3000 });
+    }
+  };
+
   return (
     <div className="flex items-center justify-center h-full">
       <Card className="w-full max-w-md bg-white/5 text-white">
@@ -62,6 +84,43 @@ const Login = () => {
         </CardHeader>
 
         <CardContent>
+          {/* //! Fast Login Buttons for testing */}
+          <div className="space-y-3 mb-6">
+            <button
+              type="button"
+              onClick={() =>
+                handleFastLogin({
+                  email: "admin@mastery.com",
+                  password: "MasteryAdminPassword@123",
+                })
+              }
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition">
+              <span>Admin Login</span>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                handleFastLogin({
+                  email: "user1@mastery.com",
+                  password: "MasteryAdminPassword@123",
+                })
+              }
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition">
+              <span>User Login</span>
+            </button>
+          </div>
+          {/* //! Fast Login Buttons for testing */}
+
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white/5 text-gray-400">
+                Or login manually
+              </span>
+            </div>
+          </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email or user id*/}
             <div className="space-y-1">
@@ -69,14 +128,12 @@ const Login = () => {
               <Input
                 type="text"
                 placeholder="Enter email or user ID"
-                {...register("identifier", {
+                {...register("email", {
                   required: "Email is required",
                 })}
               />
-              {errors.identifier && (
-                <p className="text-sm text-red-500">
-                  {errors.identifier.message}
-                </p>
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
 
@@ -93,8 +150,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setOpen(!open)}
-                className="absolute right-2 top-7 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
-              >
+                className="absolute right-2 top-7 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100">
                 {open ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
               {errors.password && (
@@ -108,8 +164,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-white/5 cursor-pointer"
-            >
+              className="w-full bg-white/5 cursor-pointer">
               Login
             </Button>
           </form>
