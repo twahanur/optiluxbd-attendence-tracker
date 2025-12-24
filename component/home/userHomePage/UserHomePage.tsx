@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const HomePage = () => {
+const UserHomePage = () => {
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const daysInMonth = getDaysInMonth(new Date(year, month));
@@ -127,4 +127,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default UserHomePage;
