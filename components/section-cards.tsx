@@ -98,7 +98,7 @@ export function SectionCards({ stastCardData }: SectionCardsProps) {
           <CardAction>
             <Badge variant="outline">
               <IconTrendingUp />
-              Today's Rate
+              Today&apos;s Rate
             </Badge>
           </CardAction>
         </CardHeader>

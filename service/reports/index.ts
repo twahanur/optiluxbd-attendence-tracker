@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use server";
 import { config } from "@/config";
-import { cookies } from "next/headers";
+
+// Utility function to get cookie value
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+};
 
 export const GetDailyReportPDF = async (date: string) => {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get("authToken")?.value;
+    const authToken = getCookie("authToken");
 
     const res = await fetch(
       `${config.next_public_base_api}/reports/daily/pdf?date=${date}`,
@@ -16,10 +20,7 @@ export const GetDailyReportPDF = async (date: string) => {
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
           "Content-Type": "application/json",
         },
-        next: {
-          tags: ["reports", "daily"],
-        },
-      }
+      },
     );
 
     if (!res.ok) {
@@ -44,8 +45,7 @@ export const GetDailyReportPDF = async (date: string) => {
 
 export const GetWeeklyReportPDF = async (startDate: string) => {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get("authToken")?.value;
+    const authToken = getCookie("authToken");
 
     const res = await fetch(
       `${config.next_public_base_api}/reports/weekly/pdf?startDate=${startDate}`,
@@ -55,10 +55,7 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
           "Content-Type": "application/json",
         },
-        next: {
-          tags: ["reports", "weekly"],
-        },
-      }
+      },
     );
 
     if (!res.ok) {
@@ -83,8 +80,7 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
 
 export const GetMonthlyReportPDF = async (year: number, month: number) => {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get("authToken")?.value;
+    const authToken = getCookie("authToken");
 
     const res = await fetch(
       `${config.next_public_base_api}/reports/monthly/pdf?year=${year}&month=${month}`,
@@ -94,10 +90,7 @@ export const GetMonthlyReportPDF = async (year: number, month: number) => {
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
           "Content-Type": "application/json",
         },
-        next: {
-          tags: ["reports", "monthly"],
-        },
-      }
+      },
     );
 
     if (!res.ok) {
@@ -109,7 +102,9 @@ export const GetMonthlyReportPDF = async (year: number, month: number) => {
     return {
       success: true,
       data: blob,
-      filename: `monthly-report-${year}-${month.toString().padStart(2, "0")}.pdf`,
+      filename: `monthly-report-${year}-${month
+        .toString()
+        .padStart(2, "0")}.pdf`,
     };
   } catch (error: any) {
     console.error("Error fetching monthly report:", error);
@@ -122,6 +117,12 @@ export const GetMonthlyReportPDF = async (year: number, month: number) => {
 
 // Helper function to download blob as file
 export const downloadPDFReport = (blob: Blob, filename: string) => {
+  // Check if we're in the browser environment
+  if (typeof window === "undefined") {
+    console.error("downloadPDFReport can only be used in browser environment");
+    return;
+  }
+
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

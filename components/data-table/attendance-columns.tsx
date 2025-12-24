@@ -94,7 +94,7 @@ export const attendanceColumns: ColumnDef<AttendanceRecord>[] = [
         absent: "bg-red-100 text-red-800",
         halfDay: "bg-blue-100 text-blue-800",
       };
-      
+
       return (
         <div className="flex items-center space-x-1">
           {status === "present" && (
@@ -102,8 +102,7 @@ export const attendanceColumns: ColumnDef<AttendanceRecord>[] = [
           )}
           <Badge
             className={statusColors[status as keyof typeof statusColors]}
-            variant="secondary"
-          >
+            variant="secondary">
             {status}
           </Badge>
         </div>
@@ -119,7 +118,7 @@ export const attendanceColumns: ColumnDef<AttendanceRecord>[] = [
         {
           hour: "2-digit",
           minute: "2-digit",
-        }
+        },
       );
       return <span className="font-mono text-sm">{time}</span>;
     },
@@ -129,8 +128,9 @@ export const attendanceColumns: ColumnDef<AttendanceRecord>[] = [
     header: "Check Out",
     cell: ({ row }) => {
       const checkOutTime = row.original.checkOutTime;
-      if (!checkOutTime) return <span className="text-muted-foreground">—</span>;
-      
+      if (!checkOutTime)
+        return <span className="text-muted-foreground">—</span>;
+
       const time = new Date(checkOutTime).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",

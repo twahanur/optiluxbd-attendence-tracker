@@ -238,7 +238,7 @@ export function DataTable({
   if (isLoading) {
     return (
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <p className="text-white/70 text-lg">Loading attendance data...</p>
           </div>
@@ -252,7 +252,7 @@ export function DataTable({
       defaultValue="outline"
       className="w-full flex-col justify-start gap-6">
       <div className="flex items-center justify-between px-4 lg:px-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
+        <TabsList className="grid w-full grid-cols-4 lg:w-150">
           <TabsTrigger value="outline">Attendance</TabsTrigger>
           <TabsTrigger value="solid">Absent</TabsTrigger>
           <TabsTrigger value="key-personnel">Analytics</TabsTrigger>
@@ -268,7 +268,7 @@ export function DataTable({
             onChange={(event) =>
               attendanceTable.getColumn("employeeName")?.setFilterValue(event.target.value)
             }
-            className="h-8 w-[150px] lg:w-[250px]"
+            className="h-8 w-37.5 lg:w-62.5"
           />
           {isMobile ? (
             <Drawer>
@@ -336,7 +336,7 @@ export function DataTable({
                   View
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[150px]">
+              <DropdownMenuContent align="end" className="w-37.5">
                 {attendanceTable
                   .getAllColumns()
                   .filter(
@@ -444,7 +444,7 @@ export function DataTable({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                <div className="flex w-25 items-center justify-center text-sm font-medium">
                   Page {attendanceTable.getState().pagination.pageIndex + 1} of{" "}
                   {attendanceTable.getPageCount()}
                 </div>
@@ -565,7 +565,7 @@ export function DataTable({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                <div className="flex w-25 items-center justify-center text-sm font-medium">
                   Page {absentTable.getState().pagination.pageIndex + 1} of{" "}
                   {absentTable.getPageCount()}
                 </div>
