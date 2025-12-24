@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import { getDay, getDaysInMonth } from "date-fns";
 import { useState } from "react";
 import { mockAttendanceStats } from "@/const/statsData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 const weekDays = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 
@@ -24,6 +26,15 @@ const moodColors: Record<string, string> = {
   TERRIBLE: "text-red-400",
 };
 
+// Mock user data - replace with actual auth context
+const user = { name: "User" };
+
+// Mock logout handler - replace with actual implementation
+const handleLogOut = () => {
+  console.log("Logout clicked");
+  // Add actual logout logic here
+};
+
 const UserHomePage = () => {
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
@@ -31,7 +42,7 @@ const UserHomePage = () => {
   const firstDayOfMonth = getDay(new Date(year, month));
   const startOffset = (firstDayOfMonth + 1) % 7;
 
-  const { totalAttendanceDays, currentMonthAttendance } = mockAttendanceStats;
+  const { currentMonthAttendance } = mockAttendanceStats;
 
   const now = new Date();
   const todayDate = now.getDate();
@@ -56,121 +67,71 @@ const UserHomePage = () => {
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex gap-10 ">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="default"
-              className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer"
-            >
-              {months[month]}
-            </Button>
-          </DropdownMenuTrigger>
+      <div className="bg-white/5 backdrop-blur-2xl px-6 py-2 rounded-xl flex items-center justify-between">
+        <div className="flex gap-10 ">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="default"
+                className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer">
+                {months[month]}
+              </Button>
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent
-            align="start"
-            className="bg-white/10 backdrop-blur-2xl text-white"
-          >
-            {months.map((m, i) => (
-              <DropdownMenuItem key={i} onClick={() => setMonth(i)}>
-                {m}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <DropdownMenuContent
+              align="start"
+              className="bg-white/10 backdrop-blur-2xl text-white">
+              {months.map((m, i) => (
+                <DropdownMenuItem key={i} onClick={() => setMonth(i)}>
+                  {m}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="default"
-              className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer"
-            >
-              {year}
-            </Button>
-          </DropdownMenuTrigger>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="default"
+                className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer">
+                {year}
+              </Button>
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent
-            align="start"
-            className="bg-white/10 backdrop-blur-2xl text-white"
-          >
-            {years.map((m, i) => (
-              <DropdownMenuItem key={i} onClick={() => setYear(m)}>
-                {m}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Attendance */}
-        <Card className="bg-white/5 backdrop-blur-xl text-white">
-          <CardHeader>
-            <CardTitle className="text-sm ">Total Attendance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalAttendanceDays}</p>
-            <p className="text-xs ">Days attended overall</p>
-          </CardContent>
-        </Card>
-
-        {/* Monthly Attendance */}
-        <Card className="bg-white/5 backdrop-blur-xl text-white">
-          <CardHeader>
-            <CardTitle className="text-sm ">This Month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {currentMonthAttendance.attendedDays} /{" "}
-              {currentMonthAttendance.totalDays}
-            </p>
-            <p className="text-xs  mt-1">{currentMonthAttendance.month}</p>
-          </CardContent>
-        </Card>
-
-        {/* Attendance Percentage */}
-        <Card className="bg-white/5 backdrop-blur-xl text-white">
-          <CardHeader>
-            <CardTitle className="text-sm ">Attendance %</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {currentMonthAttendance.attendancePercentage}%
-            </p>
-            <div className="w-full h-2 bg-white/10 rounded-full mt-2">
-              <div
-                className="h-2 bg-green-500 rounded-full transition-all"
-                style={{
-                  width: `${currentMonthAttendance.attendancePercentage}%`,
-                }}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Month & Year */}
-        <Card className="bg-white/5 backdrop-blur-xl text-white">
-          <CardHeader>
-            <CardTitle className="text-sm ">Period</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-semibold">
-              {currentMonthAttendance.year}
-            </p>
-            <p className="text-sm ">{currentMonthAttendance.month}</p>
-          </CardContent>
-        </Card>
+            <DropdownMenuContent
+              align="start"
+              className="bg-white/10 backdrop-blur-2xl text-white">
+              {years.map((m, i) => (
+                <DropdownMenuItem key={i} onClick={() => setYear(m)}>
+                  {m}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex items-center gap-6">
+          {user ? (
+            <button
+              onClick={handleLogOut}
+              className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
+              Logout
+            </button>
+          ) : (
+            <button className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
+              <Link href="/login">Login</Link>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Calendar */}
       <div className="flex items-start gap-6 w-full">
         <div className="grid grid-cols-7 gap-2 bg-white/5 backdrop-blur-2xl p-4 rounded-xl w-full">
           {/* Weekday header */}
-          {weekDays.map((day) => (
+          {weekDays.map((day, i) => (
             <div
-              key={day}
-              className="flex items-center justify-center text-sm font-semibold text-gray-300 "
-            >
+              key={i}
+              className="h-12 w-full rounded-md border border-[rgba(34,197,94,0.50)] bg-[rgba(20,83,45,0.10)] p-2 flex justify-center items-center text-sm font-medium">
               {day}
             </div>
           ))}
