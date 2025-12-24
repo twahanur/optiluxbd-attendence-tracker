@@ -29,9 +29,9 @@ const Login = () => {
   } = useForm<TLoginData>();
 
   const onSubmit = async (data: TLoginData) => {
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.identifier);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
     const payload = {
-      ...(isEmail ? { email: data.identifier } : { userId: data.identifier }),
+      ...(isEmail ? { email: data.email } : { userId: data.email }),
       password: data.password,
     };
     const toastId = toast.loading("Logging in...");
