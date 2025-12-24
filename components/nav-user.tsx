@@ -53,7 +53,9 @@ export function NavUser({
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium text-white">{user.name}</span>
+                <span className="truncate font-medium text-white">
+                  {user.name}
+                </span>
                 <span className="text-white/70 truncate text-xs">
                   {user.email}
                 </span>
