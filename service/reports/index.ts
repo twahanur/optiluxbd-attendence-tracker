@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { config } from "@/config";
+import { getValidToken } from "@/utills/getCookie";
 
 // Utility function to get cookie value
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift();
-};
 
 export const GetDailyReportPDF = async (date: string) => {
   try {
-    const authToken = getCookie("authToken");
+    const authToken = await getValidToken();
 
     const res = await fetch(
       `${config.next_public_base_api}/reports/daily/pdf?date=${date}`,
@@ -20,7 +16,7 @@ export const GetDailyReportPDF = async (date: string) => {
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
           "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     if (!res.ok) {
@@ -45,7 +41,7 @@ export const GetDailyReportPDF = async (date: string) => {
 
 export const GetWeeklyReportPDF = async (startDate: string) => {
   try {
-    const authToken = getCookie("authToken");
+    const authToken = await getValidToken();
 
     const res = await fetch(
       `${config.next_public_base_api}/reports/weekly/pdf?startDate=${startDate}`,
@@ -55,7 +51,7 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
           "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     if (!res.ok) {
@@ -80,7 +76,7 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
 
 export const GetMonthlyReportPDF = async (year: number, month: number) => {
   try {
-    const authToken = getCookie("authToken");
+    const authToken = await getValidToken();
 
     const res = await fetch(
       `${config.next_public_base_api}/reports/monthly/pdf?year=${year}&month=${month}`,
@@ -90,7 +86,7 @@ export const GetMonthlyReportPDF = async (year: number, month: number) => {
           ...(authToken && { Authorization: `Bearer ${authToken}` }),
           "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     if (!res.ok) {
