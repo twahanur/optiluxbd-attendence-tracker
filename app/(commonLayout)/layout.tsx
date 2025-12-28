@@ -1,12 +1,12 @@
-import HomePage from "@/component/home/HomePage";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { GetStatistics } from "@/service/admin";
 
-const Home = async () => {
-  const res = await GetStatistics();
-  console.log(res);
+const CommonLayout = ({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) => {
   return (
     <section className="px-10 py-4">
       <SidebarProvider
@@ -20,11 +20,11 @@ const Home = async () => {
         <AppSidebar variant="inset" />
         <SidebarInset>
           <SiteHeader />
-          <HomePage />
+          {children}
         </SidebarInset>
       </SidebarProvider>
     </section>
   );
 };
 
-export default Home;
+export default CommonLayout;

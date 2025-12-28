@@ -5,7 +5,13 @@ const authRoutes = ["/login"];
 
 const rolebasedPrivateUser = {
   EMPLOYEE: [/^\/$/, /^\/profile$/, /^\/settings$/],
-  ADMIN: [/^\/$/, /^\/profile$/, /^\/settings$/, /^\/user(\/.*)?$/],
+  ADMIN: [
+    /^\/$/,
+    /^\/dashboard$/,
+    /^\/profile$/,
+    /^\/settings$/,
+    /^\/user(\/.*)?$/,
+  ],
 };
 
 type TRole = keyof typeof rolebasedPrivateUser;
@@ -41,5 +47,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/profile", "/settings", "/user/(.*)"],
+  matcher: ["/", "/profile", "/settings", "/dashboard", "/user/(.*)"],
 };

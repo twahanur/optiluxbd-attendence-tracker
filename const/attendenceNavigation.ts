@@ -22,4 +22,9 @@ export const navMain: TNavmain[] = [
     url: "/users",
     icon: Users,
   },
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Users,
+  },
 ];

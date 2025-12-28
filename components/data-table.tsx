@@ -76,50 +76,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// Import our modular components
-import { AttendanceRecord, AbsentEmployee } from "./data-table/schemas";
 import { attendanceColumns } from "./data-table/attendance-columns";
 import { absentEmployeeColumns } from "./data-table/absent-employee-columns";
 import { AttendanceDraggableRow } from "./data-table/attendance-draggable-row";
 import { AbsentEmployeeDraggableRow } from "./data-table/absent-employee-draggable-row";
 import { AnalyticsTab } from "./data-table/analytics-tab";
 import { ReportsTab } from "./data-table/reports-tab";
+import { TStatsArray } from "@/type/attendenceStatsArray";
 
-interface DataTableProps {
-  data: {
-    recentAttendances?: AttendanceRecord[];
-    notAttendedEmployees?: AbsentEmployee[];
-  };
-  isLoading?: boolean;
-}
-
-export function DataTable({
-  data: attendanceData,
-  isLoading = false,
-}: DataTableProps) {
-  console.log("DataTable received data:", attendanceData);
-  console.log("Is Loading:", isLoading);
-
+const DataTable = ({ data }: { data: TStatsArray }) => {
   const attendanceRecords = React.useMemo(() => {
-    const records = attendanceData?.recentAttendances || [];
-    console.log("Attendance Records:", records);
+    const records = data?.recentAttendances || [];
     return records;
-  }, [attendanceData?.recentAttendances]);
+  }, [data?.recentAttendances]);
 
   const absentEmployees = React.useMemo(() => {
-    const employees = attendanceData?.notAttendedEmployees || [];
-    console.log("Absent Employees:", employees);
+    const employees = data?.notAttendedEmployees || [];
     return employees;
-  }, [attendanceData?.notAttendedEmployees]);
+  }, [data?.notAttendedEmployees]);
 
-  const [attendanceDataState, setAttendanceDataState] = React.useState(
-    attendanceRecords,
-  );
-  const [absentDataState, setAbsentDataState] = React.useState(
-    absentEmployees,
-  );
+  const [attendanceDataState, setAttendanceDataState] =
+    React.useState(attendanceRecords);
 
+  const [absentDataState, setAbsentDataState] = React.useState(absentEmployees);
   React.useEffect(() => {
     setAttendanceDataState(attendanceRecords);
   }, [attendanceRecords]);
@@ -135,7 +114,7 @@ export function DataTable({
   const [rowSelection, setRowSelection] = React.useState({});
 
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
+    []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
@@ -149,17 +128,17 @@ export function DataTable({
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {}),
+    useSensor(KeyboardSensor, {})
   );
 
   const attendanceDataIds = React.useMemo<UniqueIdentifier[]>(
     () => attendanceDataState?.map(({ id }) => id),
-    [attendanceDataState],
+    [attendanceDataState]
   );
 
   const absentDataIds = React.useMemo<UniqueIdentifier[]>(
     () => absentDataState?.map(({ id }) => id),
-    [absentDataState],
+    [absentDataState]
   );
 
   // Attendance table
@@ -212,7 +191,7 @@ export function DataTable({
     },
   });
 
-  function handleDragEnd(event: DragEndEvent) {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active && over && active.id !== over.id) {
@@ -233,24 +212,13 @@ export function DataTable({
         });
       }
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex items-center justify-center min-h-100">
-          <div className="text-center">
-            <p className="text-white/70 text-lg">Loading attendance data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
     <Tabs
       defaultValue="outline"
-      className="w-full flex-col justify-start gap-6">
+      className="w-full flex-col justify-start gap-6"
+    >
       <div className="flex items-center justify-between px-4 lg:px-6">
         <TabsList className="grid w-full grid-cols-4 lg:w-150">
           <TabsTrigger value="outline">Attendance</TabsTrigger>
@@ -263,10 +231,14 @@ export function DataTable({
           <Input
             placeholder="Search employees..."
             value={
-              (attendanceTable.getColumn("employeeName")?.getFilterValue() as string) ?? ""
+              (attendanceTable
+                .getColumn("employeeName")
+                ?.getFilterValue() as string) ?? ""
             }
             onChange={(event) =>
-              attendanceTable.getColumn("employeeName")?.setFilterValue(event.target.value)
+              attendanceTable
+                .getColumn("employeeName")
+                ?.setFilterValue(event.target.value)
             }
             className="h-8 w-37.5 lg:w-62.5"
           />
@@ -276,7 +248,8 @@ export function DataTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="ml-auto h-8 hidden lg:flex">
+                  className="ml-auto h-8 hidden lg:flex"
+                >
                   <IconLayoutColumns className="mr-2 h-4 w-4" />
                   View
                 </Button>
@@ -296,20 +269,26 @@ export function DataTable({
                         .filter(
                           (column) =>
                             typeof column.accessorFn !== "undefined" &&
-                            column.getCanHide(),
+                            column.getCanHide()
                         )
                         .map((column) => {
                           return (
-                            <div key={column.id} className="flex items-center space-x-2">
+                            <div
+                              key={column.id}
+                              className="flex items-center space-x-2"
+                            >
                               <input
                                 type="checkbox"
                                 className="rounded border border-primary"
                                 checked={column.getIsVisible()}
-                                onChange={(e) => column.toggleVisibility(e.target.checked)}
+                                onChange={(e) =>
+                                  column.toggleVisibility(e.target.checked)
+                                }
                               />
                               <Label
                                 htmlFor={column.id}
-                                className="text-sm font-normal">
+                                className="text-sm font-normal"
+                              >
                                 {column.id}
                               </Label>
                             </div>
@@ -331,7 +310,8 @@ export function DataTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="ml-auto h-8 hidden lg:flex">
+                  className="ml-auto h-8 hidden lg:flex"
+                >
                   <IconLayoutColumns className="mr-2 h-4 w-4" />
                   View
                 </Button>
@@ -342,7 +322,7 @@ export function DataTable({
                   .filter(
                     (column) =>
                       typeof column.accessorFn !== "undefined" &&
-                      column.getCanHide(),
+                      column.getCanHide()
                   )
                   .map((column) => {
                     return (
@@ -352,7 +332,8 @@ export function DataTable({
                         checked={column.getIsVisible()}
                         onCheckedChange={(value: boolean) =>
                           column.toggleVisibility(!!value)
-                        }>
+                        }
+                      >
                         {column.id}
                       </DropdownMenuCheckboxItem>
                     );
@@ -370,13 +351,15 @@ export function DataTable({
       {/* Attendance Tab */}
       <TabsContent
         value="outline"
-        className="flex flex-col space-y-4 px-4 lg:px-6">
+        className="flex flex-col space-y-4 px-4 lg:px-6"
+      >
         <DndContext
           id={sortableId}
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis]}
           onDragEnd={handleDragEnd}
-          sensors={sensors}>
+          sensors={sensors}
+        >
           <div className="space-y-4">
             <div className="rounded-md border">
               <Table>
@@ -389,7 +372,7 @@ export function DataTable({
                             ? null
                             : flexRender(
                                 header.column.columnDef.header,
-                                header.getContext(),
+                                header.getContext()
                               )}
                         </TableHead>
                       ))}
@@ -400,7 +383,8 @@ export function DataTable({
                   {attendanceTable.getRowModel().rows?.length ? (
                     <SortableContext
                       items={attendanceDataIds}
-                      strategy={verticalListSortingStrategy}>
+                      strategy={verticalListSortingStrategy}
+                    >
                       {attendanceTable.getRowModel().rows.map((row) => (
                         <AttendanceDraggableRow key={row.id} row={row} />
                       ))}
@@ -409,7 +393,8 @@ export function DataTable({
                     <TableRow>
                       <TableCell
                         colSpan={attendanceColumns.length}
-                        className="h-24 text-center">
+                        className="h-24 text-center"
+                      >
                         No results.
                       </TableCell>
                     </TableRow>
@@ -422,7 +407,8 @@ export function DataTable({
             <div className="flex items-center justify-between space-x-2 py-4">
               <div className="flex-1 text-sm text-muted-foreground">
                 {attendanceTable.getFilteredSelectedRowModel().rows.length} of{" "}
-                {attendanceTable.getFilteredRowModel().rows.length} row(s) selected.
+                {attendanceTable.getFilteredRowModel().rows.length} row(s)
+                selected.
               </div>
               <div className="flex items-center space-x-6 lg:space-x-8">
                 <div className="flex items-center space-x-2">
@@ -431,9 +417,14 @@ export function DataTable({
                     value={`${attendanceTable.getState().pagination.pageSize}`}
                     onValueChange={(value: string) => {
                       attendanceTable.setPageSize(Number(value));
-                    }}>
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={attendanceTable.getState().pagination.pageSize} />
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-17.5">
+                      <SelectValue
+                        placeholder={
+                          attendanceTable.getState().pagination.pageSize
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent side="top">
                       {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -453,7 +444,8 @@ export function DataTable({
                     variant="outline"
                     className="hidden h-8 w-8 p-0 lg:flex"
                     onClick={() => attendanceTable.setPageIndex(0)}
-                    disabled={!attendanceTable.getCanPreviousPage()}>
+                    disabled={!attendanceTable.getCanPreviousPage()}
+                  >
                     <span className="sr-only">Go to first page</span>
                     <IconChevronsLeft className="h-4 w-4" />
                   </Button>
@@ -461,7 +453,8 @@ export function DataTable({
                     variant="outline"
                     className="h-8 w-8 p-0"
                     onClick={() => attendanceTable.previousPage()}
-                    disabled={!attendanceTable.getCanPreviousPage()}>
+                    disabled={!attendanceTable.getCanPreviousPage()}
+                  >
                     <span className="sr-only">Go to previous page</span>
                     <IconChevronLeft className="h-4 w-4" />
                   </Button>
@@ -469,15 +462,21 @@ export function DataTable({
                     variant="outline"
                     className="h-8 w-8 p-0"
                     onClick={() => attendanceTable.nextPage()}
-                    disabled={!attendanceTable.getCanNextPage()}>
+                    disabled={!attendanceTable.getCanNextPage()}
+                  >
                     <span className="sr-only">Go to next page</span>
                     <IconChevronRight className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     className="hidden h-8 w-8 p-0 lg:flex"
-                    onClick={() => attendanceTable.setPageIndex(attendanceTable.getPageCount() - 1)}
-                    disabled={!attendanceTable.getCanNextPage()}>
+                    onClick={() =>
+                      attendanceTable.setPageIndex(
+                        attendanceTable.getPageCount() - 1
+                      )
+                    }
+                    disabled={!attendanceTable.getCanNextPage()}
+                  >
                     <span className="sr-only">Go to last page</span>
                     <IconChevronsRight className="h-4 w-4" />
                   </Button>
@@ -491,13 +490,15 @@ export function DataTable({
       {/* Absent Employees Tab */}
       <TabsContent
         value="solid"
-        className="flex flex-col space-y-4 px-4 lg:px-6">
+        className="flex flex-col space-y-4 px-4 lg:px-6"
+      >
         <DndContext
           id={`${sortableId}-absent`}
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis]}
           onDragEnd={handleDragEnd}
-          sensors={sensors}>
+          sensors={sensors}
+        >
           <div className="space-y-4">
             <div className="rounded-md border">
               <Table>
@@ -510,7 +511,7 @@ export function DataTable({
                             ? null
                             : flexRender(
                                 header.column.columnDef.header,
-                                header.getContext(),
+                                header.getContext()
                               )}
                         </TableHead>
                       ))}
@@ -521,7 +522,8 @@ export function DataTable({
                   {absentTable.getRowModel().rows?.length ? (
                     <SortableContext
                       items={absentDataIds}
-                      strategy={verticalListSortingStrategy}>
+                      strategy={verticalListSortingStrategy}
+                    >
                       {absentTable.getRowModel().rows.map((row) => (
                         <AbsentEmployeeDraggableRow key={row.id} row={row} />
                       ))}
@@ -530,7 +532,8 @@ export function DataTable({
                     <TableRow>
                       <TableCell
                         colSpan={absentEmployeeColumns.length}
-                        className="h-24 text-center">
+                        className="h-24 text-center"
+                      >
                         No absent employees today.
                       </TableCell>
                     </TableRow>
@@ -552,9 +555,12 @@ export function DataTable({
                     value={`${absentTable.getState().pagination.pageSize}`}
                     onValueChange={(value: string) => {
                       absentTable.setPageSize(Number(value));
-                    }}>
-                    <SelectTrigger className="h-8 w-[70px]">
-                      <SelectValue placeholder={absentTable.getState().pagination.pageSize} />
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-17.5">
+                      <SelectValue
+                        placeholder={absentTable.getState().pagination.pageSize}
+                      />
                     </SelectTrigger>
                     <SelectContent side="top">
                       {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -574,7 +580,8 @@ export function DataTable({
                     variant="outline"
                     className="hidden h-8 w-8 p-0 lg:flex"
                     onClick={() => absentTable.setPageIndex(0)}
-                    disabled={!absentTable.getCanPreviousPage()}>
+                    disabled={!absentTable.getCanPreviousPage()}
+                  >
                     <span className="sr-only">Go to first page</span>
                     <IconChevronsLeft className="h-4 w-4" />
                   </Button>
@@ -582,7 +589,8 @@ export function DataTable({
                     variant="outline"
                     className="h-8 w-8 p-0"
                     onClick={() => absentTable.previousPage()}
-                    disabled={!absentTable.getCanPreviousPage()}>
+                    disabled={!absentTable.getCanPreviousPage()}
+                  >
                     <span className="sr-only">Go to previous page</span>
                     <IconChevronLeft className="h-4 w-4" />
                   </Button>
@@ -590,15 +598,19 @@ export function DataTable({
                     variant="outline"
                     className="h-8 w-8 p-0"
                     onClick={() => absentTable.nextPage()}
-                    disabled={!absentTable.getCanNextPage()}>
+                    disabled={!absentTable.getCanNextPage()}
+                  >
                     <span className="sr-only">Go to next page</span>
                     <IconChevronRight className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
                     className="hidden h-8 w-8 p-0 lg:flex"
-                    onClick={() => absentTable.setPageIndex(absentTable.getPageCount() - 1)}
-                    disabled={!absentTable.getCanNextPage()}>
+                    onClick={() =>
+                      absentTable.setPageIndex(absentTable.getPageCount() - 1)
+                    }
+                    disabled={!absentTable.getCanNextPage()}
+                  >
                     <span className="sr-only">Go to last page</span>
                     <IconChevronsRight className="h-4 w-4" />
                   </Button>
@@ -611,19 +623,24 @@ export function DataTable({
 
       {/* Analytics Tab */}
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
-        <AnalyticsTab 
-          attendanceDataState={attendanceDataState} 
-          absentDataState={absentDataState} 
+        <AnalyticsTab
+          attendanceDataState={attendanceDataState}
+          absentDataState={absentDataState}
         />
       </TabsContent>
 
       {/* Reports Tab */}
-      <TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
-        <ReportsTab 
-          attendanceDataState={attendanceDataState} 
-          absentDataState={absentDataState} 
+      <TabsContent
+        value="focus-documents"
+        className="flex flex-col px-4 lg:px-6"
+      >
+        <ReportsTab
+          attendanceDataState={attendanceDataState}
+          absentDataState={absentDataState}
         />
       </TabsContent>
     </Tabs>
   );
-}
+};
+
+export default DataTable;

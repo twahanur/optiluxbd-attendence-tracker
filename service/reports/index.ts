@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { config } from "@/config";
-import { getValidToken } from "@/utills/getCookie";
+import { getValidToken } from "../auth/validToken";
 
 // Utility function to get cookie value
 
@@ -13,7 +13,7 @@ export const GetDailyReportPDF = async (date: string) => {
       {
         method: "GET",
         headers: {
-          ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       }
@@ -48,7 +48,7 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
       {
         method: "GET",
         headers: {
-          ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       }
@@ -83,7 +83,7 @@ export const GetMonthlyReportPDF = async (year: number, month: number) => {
       {
         method: "GET",
         headers: {
-          ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       }

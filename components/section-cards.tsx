@@ -1,6 +1,6 @@
-import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react"
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -8,24 +8,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 interface SectionCardsProps {
-  stastCardData: {
-    totalEmployees?: number;
-    totalAttendedToday?: number;
-    totalNotAttendedToday?: number;
-    attendancePercentageToday?: number;
-  };
+  attendancePercentageToday: number;
+  totalAttendedToday: number;
+  totalEmployees: number;
+  totalNotAttendedToday: number;
 }
 
-export function SectionCards({ stastCardData }: SectionCardsProps) {
+export function SectionCards({ data }: { data: SectionCardsProps }) {
   const {
     totalEmployees = 0,
     totalAttendedToday = 0,
     totalNotAttendedToday = 0,
     attendancePercentageToday = 0,
-  } = stastCardData;
+  } = data;
 
   return (
     <div className="*:data-[slot=card]:from-transparent *:data-[slot=card]:to-transparent dark:*:data-[slot=card]:bg-transparent grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-transparent *:data-[slot=card]:border *:data-[slot=card]:border-white/10 *:data-[slot=card]:shadow-none lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -33,7 +31,7 @@ export function SectionCards({ stastCardData }: SectionCardsProps) {
         <CardHeader>
           <CardDescription>Total Employees</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {totalEmployees}
+            {totalEmployees ?? 0}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
