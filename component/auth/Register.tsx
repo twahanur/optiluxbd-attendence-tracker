@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import RegistrationSuccess from "./RegistrationSuccess";
-import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,14 +49,13 @@ type TRegistrationData = {
 };
 
 const Registration = () => {
-  const [open, setOpen] = useState(false);
+  const [open] = useState(false);
   const [show, setShow] = useState(false);
   const {
     handleSubmit,
     register,
-    reset,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<TRegistrationData>();
 
   const onSubmit = async (data: TRegistrationData) => {
@@ -152,8 +149,7 @@ const Registration = () => {
                     <Select
                       onValueChange={(value) =>
                         setValue("section", value as TSection)
-                      }
-                    >
+                      }>
                       <SelectTrigger className="cursor-pointer">
                         <SelectValue placeholder="Select section" />
                       </SelectTrigger>
@@ -178,8 +174,7 @@ const Registration = () => {
                     <Select
                       onValueChange={(value) =>
                         setValue("shift", value as "Day" | "Night")
-                      }
-                    >
+                      }>
                       <SelectTrigger className="cursor-pointer">
                         <SelectValue placeholder="Select shift" />
                       </SelectTrigger>
@@ -220,8 +215,7 @@ const Registration = () => {
                   <button
                     type="button"
                     onClick={() => setShow(!show)}
-                    className="absolute right-2 top-7 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
-                  >
+                    className="absolute right-2 top-7 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100">
                     {show ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                   {errors.password && (
@@ -234,8 +228,7 @@ const Registration = () => {
                 {/* Submit */}
                 <Button
                   type="submit"
-                  className="w-full bg-white/5 cursor-pointer"
-                >
+                  className="w-full bg-white/5 cursor-pointer">
                   Register
                 </Button>
               </form>

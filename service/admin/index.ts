@@ -1,29 +1,87 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use server";
-import { config } from "@/config";
-import { getValidToken } from "@/utills/getCookie";
-import { logout } from "../auth";
+// Re-export admin settings services
+export {
+  getAllSettings,
+  getSettingsByCategory,
+  createSetting,
+  updateSetting,
+  bulkUpdateSettings,
+  deleteSetting,
+  settingsApi,
+} from "./settings";
 
-export const GetStatistics = async () => {
-  try {
-    const authToken = await getValidToken();
-    if (!authToken) {
-      logout();
-    }
+export {
+  getCompanyProfile,
+  updateCompanyProfile,
+  getWorkingHours,
+  updateWorkingHours,
+  getHolidays,
+  addHoliday,
+  updateHoliday,
+  deleteHoliday,
+  checkWorkingDay,
+  companySettingsApi,
+} from "./company-settings";
 
-    const res = await fetch(`${config.next_public_base_api}/users/dashboard`, {
-      method: "GET",
-      next: {
-        tags: ["statistics"],
-      },
-      headers: {
-        ...(authToken && { Authorization: `Bearer ${authToken}` }),
-      },
-    });
-    const result = await res.json();
+export {
+  getSMTPConfig,
+  updateSMTPConfig,
+  testSMTPConnection,
+  getAllTemplates,
+  getTemplate,
+  updateTemplate,
+  getEmailSystemStatus,
+  sendTestEmail,
+  emailSettingsApi,
+} from "./email-settings";
 
-    return result;
-  } catch (error: any) {
-    return Error(error);
-  }
-};
+export {
+  getPasswordPolicy,
+  updatePasswordPolicy,
+  validatePassword,
+  getRegistrationPolicy,
+  updateRegistrationPolicy,
+  getLockoutRules,
+  updateLockoutRules,
+  createEmployee,
+  getAllEmployees,
+  updateEmployee,
+  deleteEmployee,
+  userSettingsApi,
+} from "./user-settings";
+
+// Re-export server actions
+export { GetStatistics } from "./statistics";
+
+// Export types
+export type {
+  Setting,
+  SettingsResponse,
+  CategorySettingsResponse,
+  CreateSettingRequest,
+  BulkUpdateRequest,
+} from "./settings";
+
+export type {
+  CompanyProfile,
+  WorkingHours,
+  Holiday,
+  WorkingDayCheck,
+} from "./company-settings";
+
+export type {
+  SMTPConfig,
+  EmailTemplate,
+  EmailTemplates,
+  EmailSystemStatus,
+  TestEmailRequest,
+} from "./email-settings";
+
+export type {
+  PasswordPolicy,
+  RegistrationPolicy,
+  LockoutRules,
+  PasswordValidationRequest,
+  PasswordValidationResult,
+  CreateEmployeeRequest,
+  EmployeeResponse,
+} from "./user-settings";

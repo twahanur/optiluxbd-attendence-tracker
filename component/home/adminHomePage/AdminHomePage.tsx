@@ -1,7 +1,7 @@
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
-import { GetStatistics } from "@/service/admin";
+import { GetStatistics } from "@/service/admin/statistics";
 import { useEffect, useState } from "react";
 
 const AdminHomePage = () => {
@@ -63,7 +63,7 @@ const AdminHomePage = () => {
   if (error) {
     return (
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <div className="text-center">
             <p className="text-red-400 text-lg">{error}</p>
             <button
