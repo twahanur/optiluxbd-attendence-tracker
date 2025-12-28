@@ -1,7 +1,7 @@
 "use server";
 
 import { config } from "@/config";
-import { getValidToken } from "@/utills/getCookie";
+import { getValidToken } from "@/service/auth/validToken";
 import { logout } from "../auth";
 
 export const GetStatistics = async () => {
@@ -18,7 +18,7 @@ export const GetStatistics = async () => {
         tags: ["statistics"],
       },
       headers: {
-        ...(authToken && { Authorization: `Bearer ${authToken}` }),
+        ...(authToken && { Authorization: authToken }),
       },
     });
     

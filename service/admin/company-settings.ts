@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";
 
