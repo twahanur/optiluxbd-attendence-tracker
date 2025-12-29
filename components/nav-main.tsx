@@ -16,6 +16,11 @@ export function NavMain({
     title: string;
     url: string;
     icon?: LucideIcon;
+    items?: {
+      title: string;
+      url: string;
+      icon?: LucideIcon;
+    }[];
   }[];
 }) {
   return (

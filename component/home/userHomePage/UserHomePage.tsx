@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -157,8 +156,7 @@ const UserHomePage = () => {
                 onClick={() => {
                   if (!enabled) return;
                   console.log("Clicked today:", day);
-                }}
-              >
+                }}>
                 {day}
               </button>
             );
@@ -177,7 +175,7 @@ const UserHomePage = () => {
                     <span className={moodColors[mood]}>{mood}</span>
                     <span>{count}</span>
                   </div>
-                )
+                ),
               )}
             </CardContent>
           </Card>
@@ -194,7 +192,7 @@ const UserHomePage = () => {
                     <span>{shift}</span>
                     <span>{count}</span>
                   </div>
-                )
+                ),
               )}
             </CardContent>
           </Card>

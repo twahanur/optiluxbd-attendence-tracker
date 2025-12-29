@@ -100,10 +100,12 @@ const DataTable = ({ data }: { data: TStatsArray }) => {
 
   const [absentDataState, setAbsentDataState] = React.useState(absentEmployees);
   React.useEffect(() => {
+    console.log("🔄 Setting attendanceDataState:", attendanceRecords.length);
     setAttendanceDataState(attendanceRecords);
   }, [attendanceRecords]);
 
   React.useEffect(() => {
+    console.log("🔄 Setting absentDataState:", absentEmployees.length);
     setAbsentDataState(absentEmployees);
   }, [absentEmployees]);
 
@@ -119,7 +121,7 @@ const DataTable = ({ data }: { data: TStatsArray }) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 50, // Increased from 10 to 50 to show more employees by default
   });
 
   const sortableId = React.useId();
