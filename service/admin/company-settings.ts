@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";
 
@@ -127,3 +127,15 @@ export const checkWorkingDay = async (date: string) => {
   );
 };
 // API object for company settings
+
+export const companySettingsApi = {
+  getProfile: getCompanyProfile,
+  updateProfile: updateCompanyProfile,
+  getWorkingHours,
+  updateWorkingHours,
+  getHolidays,
+  addHoliday,
+  updateHoliday,
+  deleteHoliday,
+  checkWorkingDay,
+};

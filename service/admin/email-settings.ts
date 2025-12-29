@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { apiGet, apiPost, apiPut } from "@/lib/service-client";
 
@@ -124,4 +124,17 @@ export const sendTestEmail = async (testData: TestEmailRequest) => {
     {},
     "Failed to send test email"
   );
+};
+
+export const emailSettingsApi = {
+  getSMTPConfig,
+  updateSMTPConfig,
+  testSMTPConnection,
+  getAllTemplates,
+  getTemplate,
+  updateTemplate,
+  getEmailSystemStatus,
+  // legacy alias used by some components
+  getSystemStatus: getEmailSystemStatus,
+  sendTestEmail,
 };

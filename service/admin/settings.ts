@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";
 
@@ -95,4 +95,13 @@ export const bulkUpdateSettings = async (data: BulkUpdateRequest) => {
 // Delete setting
 export const deleteSetting = async (key: string) => {
   return apiDelete(`/admin/settings/${key}`, {}, "Failed to delete setting");
+};
+
+export const settingsApi = {
+  getAll: getAllSettings,
+  getByCategory: getSettingsByCategory,
+  create: createSetting,
+  update: updateSetting,
+  bulkUpdate: bulkUpdateSettings,
+  delete: deleteSetting,
 };

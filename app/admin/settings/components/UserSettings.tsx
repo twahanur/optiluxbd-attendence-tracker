@@ -28,6 +28,7 @@ import {
   PasswordPolicy, 
   RegistrationPolicy, 
   LockoutRules, 
+  PasswordValidationResult,
   CreateEmployeeRequest,
   EmployeeResponse 
 } from '@/service/admin';
@@ -88,7 +89,7 @@ export default function UserSettings() {
 
   // Password Validation State
   const [testPassword, setTestPassword] = useState('');
-  const [validationResult, setValidationResult] = useState<{ isValid: boolean; errors: string[]; strength?: string } | null>(null);
+  const [validationResult, setValidationResult] = useState<PasswordValidationResult | null>(null);
 
   useEffect(() => {
     loadUserSettings();
@@ -104,9 +105,15 @@ export default function UserSettings() {
         userSettingsApi.getLockoutRules(),
       ]);
 
-      setPasswordPolicy(passwordRes.data.passwordPolicy);
-      setRegistrationPolicy(registrationRes.data.registrationPolicy);
-      setLockoutRules(lockoutRes.data.lockoutRules);
+      if (passwordRes.data?.passwordPolicy) {
+        setPasswordPolicy(passwordRes.data.passwordPolicy);
+      }
+      if (registrationRes.data?.registrationPolicy) {
+        setRegistrationPolicy(registrationRes.data.registrationPolicy);
+      }
+      if (lockoutRes.data?.lockoutRules) {
+        setLockoutRules(lockoutRes.data.lockoutRules);
+      }
     } catch (error) {
       toast.error('Failed to load user settings');
       console.error(error);
@@ -118,7 +125,9 @@ export default function UserSettings() {
   const loadEmployees = async () => {
     try {
       const response = await userSettingsApi.getAllEmployees();
-      setEmployees(response.data.employees);
+      if (response.data?.employees) {
+        setEmployees(response.data.employees);
+      }
     } catch (error) {
       console.error('Failed to load employees:', error);
     }
@@ -172,7 +181,11 @@ export default function UserSettings() {
     try {
       setSaving(true);
       const response = await userSettingsApi.createEmployee(newEmployee);
-      toast.success(`Employee created successfully. Temporary password: ${response.data.temporaryPassword}`);
+      if (response.data?.temporaryPassword) {
+        toast.success(`Employee created successfully. Temporary password: ${response.data.temporaryPassword}`);
+      } else {
+        toast.success('Employee created successfully');
+      }
       setNewEmployee({
         email: '',
         name: '',
@@ -199,7 +212,7 @@ export default function UserSettings() {
         password: testPassword,
         userInfo: { email: 'test@example.com', name: 'Test User' },
       });
-      setValidationResult(response.data);
+      setValidationResult(response.data ?? null);
     } catch (error) {
       toast.error('Failed to validate password');
       console.error(error);

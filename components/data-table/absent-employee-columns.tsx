@@ -57,7 +57,7 @@ export const absentEmployeeColumns: ColumnDef<AbsentEmployee>[] = [
         {row.original.avatar && (
           <Image
             src={row.original.avatar}
-            alt={row.original.employeeName}
+            alt={row.original.employeeName ?? 'avatar'}
             width={32}
             height={32}
             className="h-8 w-8 rounded-full object-cover"
@@ -96,11 +96,13 @@ export const absentEmployeeColumns: ColumnDef<AbsentEmployee>[] = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => {
-      const date = new Date(row.original.date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      });
+      const date = row.original.date
+        ? new Date(row.original.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          })
+        : "N/A";
       return <span className="font-mono text-sm">{date}</span>;
     },
   },
@@ -109,7 +111,7 @@ export const absentEmployeeColumns: ColumnDef<AbsentEmployee>[] = [
     header: "Contact",
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground">
-        {row.original.contactInfo || "N/A"}
+        {row.original.phoneNumber || "N/A"}
       </span>
     ),
   },

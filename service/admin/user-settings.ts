@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";
 
@@ -178,4 +178,18 @@ export const updateEmployee = async (
 // Delete employee
 export const deleteEmployee = async (id: number) => {
   return apiDelete(`/admin/employees/${id}`, {}, "Failed to delete employee");
+};
+
+export const userSettingsApi = {
+  getPasswordPolicy,
+  updatePasswordPolicy,
+  validatePassword,
+  getRegistrationPolicy,
+  updateRegistrationPolicy,
+  getLockoutRules,
+  updateLockoutRules,
+  createEmployee,
+  getAllEmployees,
+  updateEmployee,
+  deleteEmployee,
 };
