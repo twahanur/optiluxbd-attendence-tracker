@@ -103,3 +103,16 @@ export const emailSettingsApi = {
   getSystemStatus: getEmailSystemStatus,
   sendTestEmail: sendTestEmail,
 };
+
+export const emailSettingsApi = {
+  getSMTPConfig,
+  updateSMTPConfig,
+  testSMTPConnection,
+  getAllTemplates,
+  getTemplate,
+  updateTemplate,
+  getEmailSystemStatus,
+  // legacy alias used by some components
+  getSystemStatus: getEmailSystemStatus,
+  sendTestEmail,
+};
