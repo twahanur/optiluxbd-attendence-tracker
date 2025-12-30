@@ -31,7 +31,7 @@ export interface Holiday {
   id?: number;
   name: string;
   date: string;
-  type: 'public' | 'private';
+  type: "public" | "private";
   description?: string;
 }
 
@@ -46,45 +46,88 @@ export interface WorkingDayCheck {
 
 // Company Profile
 export const getCompanyProfile = async () => {
-  return apiGet<{ profile: CompanyProfile }>("/admin/settings/company/profile", {}, "Failed to fetch company profile");
+  return apiGet<{ profile: CompanyProfile }>(
+    "/admin/settings/company/profile",
+    {},
+    "Failed to fetch company profile"
+  );
 };
 
 export const updateCompanyProfile = async (profile: CompanyProfile) => {
-  return apiPut("/admin/settings/company/profile", profile, {}, "Failed to update company profile");
+  return apiPut(
+    "/admin/settings/company/profile",
+    profile,
+    {},
+    "Failed to update company profile"
+  );
 };
 
 // Working Hours
 export const getWorkingHours = async () => {
-  return apiGet<{ workingHours: WorkingHours }>("/admin/settings/company/working-hours", {}, "Failed to fetch working hours");
+  return apiGet<{ workingHours: WorkingHours }>(
+    "/admin/settings/company/working-hours",
+    {},
+    "Failed to fetch working hours"
+  );
 };
 
 export const updateWorkingHours = async (workingHours: WorkingHours) => {
-  return apiPut("/admin/settings/company/working-hours", workingHours, {}, "Failed to update working hours");
+  return apiPut(
+    "/admin/settings/company/working-hours",
+    workingHours,
+    {},
+    "Failed to update working hours"
+  );
 };
 
 // Holidays
 export const getHolidays = async (year?: number) => {
-  const endpoint = year ? `/admin/settings/company/holidays?year=${year}` : `/admin/settings/company/holidays`;
-  return apiGet<{ holidays: Holiday[]; total: number; year: number }>(endpoint, {}, "Failed to fetch holidays");
+  const endpoint = year
+    ? `/admin/settings/company/holidays?year=${year}`
+    : `/admin/settings/company/holidays`;
+  return apiGet<{ holidays: Holiday[]; total: number; year: number }>(
+    endpoint,
+    {},
+    "Failed to fetch holidays"
+  );
 };
 
-export const addHoliday = async (holiday: Omit<Holiday, 'id'>) => {
-  return apiPost("/admin/settings/company/holidays", holiday, {}, "Failed to add holiday");
+export const addHoliday = async (holiday: Omit<Holiday, "id">) => {
+  return apiPost(
+    "/admin/settings/company/holidays",
+    holiday,
+    {},
+    "Failed to add holiday"
+  );
 };
 
 export const updateHoliday = async (id: number, holiday: Partial<Holiday>) => {
-  return apiPut(`/admin/settings/company/holidays/${id}`, holiday, {}, "Failed to update holiday");
+  return apiPut(
+    `/admin/settings/company/holidays/${id}`,
+    holiday,
+    {},
+    "Failed to update holiday"
+  );
 };
 
 export const deleteHoliday = async (id: number) => {
-  return apiDelete(`/admin/settings/company/holidays/${id}`, {}, "Failed to delete holiday");
+  return apiDelete(
+    `/admin/settings/company/holidays/${id}`,
+    {},
+    "Failed to delete holiday"
+  );
 };
 
 // Working Day Check
 export const checkWorkingDay = async (date: string) => {
-  return apiGet<WorkingDayCheck>(`/admin/settings/company/working-day/${date}`, {}, "Failed to check working day");
+  return apiGet<WorkingDayCheck>(
+    `/admin/settings/company/working-day/${date}`,
+    {},
+    "Failed to check working day"
+  );
 };
 // API object for company settings
+
 export const companySettingsApi = {
   getProfile: getCompanyProfile,
   updateProfile: updateCompanyProfile,

@@ -5,7 +5,7 @@ import { apiGet } from "@/lib/service-client";
 
 export const GetDepartmentReport = async (
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ) => {
   // If no dates provided, use today as default
   const today = new Date().toISOString().split("T")[0];
@@ -25,8 +25,12 @@ export const GetDepartmentReport = async (
 
 export const GetDailyReportPDF = async (date: string) => {
   try {
-    const result = await apiGet<Blob>(`/reports/daily/pdf?date=${date}`, {}, "Failed to generate daily report");
-    
+    const result = await apiGet<Blob>(
+      `/reports/daily/pdf?date=${date}`,
+      {},
+      "Failed to generate daily report"
+    );
+
     if (result.success && result.data) {
       return {
         success: true,
@@ -34,7 +38,7 @@ export const GetDailyReportPDF = async (date: string) => {
         filename: `daily-report-${date}.pdf`,
       };
     }
-    
+
     return {
       success: false,
       error: result.message || "Failed to generate daily report",
@@ -50,8 +54,12 @@ export const GetDailyReportPDF = async (date: string) => {
 
 export const GetWeeklyReportPDF = async (startDate: string) => {
   try {
-    const result = await apiGet<Blob>(`/reports/weekly/pdf?startDate=${startDate}`, {}, "Failed to generate weekly report");
-    
+    const result = await apiGet<Blob>(
+      `/reports/weekly/pdf?startDate=${startDate}`,
+      {},
+      "Failed to generate weekly report"
+    );
+
     if (result.success && result.data) {
       return {
         success: true,
@@ -59,7 +67,7 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
         filename: `weekly-report-${startDate}.pdf`,
       };
     }
-    
+
     return {
       success: false,
       error: result.message || "Failed to generate weekly report",
@@ -75,8 +83,12 @@ export const GetWeeklyReportPDF = async (startDate: string) => {
 
 export const GetMonthlyReportPDF = async (year: number, month: number) => {
   try {
-    const result = await apiGet<Blob>(`/reports/monthly/pdf?year=${year}&month=${month}`, {}, "Failed to generate monthly report");
-    
+    const result = await apiGet<Blob>(
+      `/reports/monthly/pdf?year=${year}&month=${month}`,
+      {},
+      "Failed to generate monthly report"
+    );
+
     if (result.success && result.data) {
       return {
         success: true,
@@ -86,7 +98,7 @@ export const GetMonthlyReportPDF = async (year: number, month: number) => {
           .padStart(2, "0")}.pdf`,
       };
     }
-    
+
     return {
       success: false,
       error: result.message || "Failed to generate monthly report",

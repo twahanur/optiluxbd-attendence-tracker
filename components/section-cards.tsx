@@ -29,16 +29,15 @@ export function SectionCards({ data }: { data: SectionCardsProps }) {
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="@container/card bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all duration-200 hover:border-white/20 cursor-pointer">
         <CardHeader>
-          <CardDescription className="text-white/70">
-            Total Employees
-          </CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl text-white">
-            {totalEmployees}
+          <CardDescription>Total Employees</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {totalEmployees ?? 0}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className="text-green-400 border-green-400/50 bg-green-400/10">
+              className="text-green-400 border-green-400/50 bg-green-400/10"
+            >
               <IconTrendingUp className="w-4 h-4 mr-1" />
               Company Size
             </Badge>
@@ -63,7 +62,8 @@ export function SectionCards({ data }: { data: SectionCardsProps }) {
           <CardAction>
             <Badge
               variant="outline"
-              className="text-green-400 border-green-400/50 bg-green-400/10">
+              className="text-green-400 border-green-400/50 bg-green-400/10"
+            >
               <IconTrendingUp className="w-4 h-4 mr-1" />
               {attendancePercentageToday}%
             </Badge>
@@ -88,7 +88,8 @@ export function SectionCards({ data }: { data: SectionCardsProps }) {
           <CardAction>
             <Badge
               variant="outline"
-              className="text-red-400 border-red-400/50 bg-red-400/10">
+              className="text-red-400 border-red-400/50 bg-red-400/10"
+            >
               <IconTrendingDown className="w-4 h-4 mr-1" />
               {100 - attendancePercentageToday}%
             </Badge>
@@ -113,7 +114,8 @@ export function SectionCards({ data }: { data: SectionCardsProps }) {
           <CardAction>
             <Badge
               variant="outline"
-              className="text-blue-400 border-blue-400/50 bg-blue-400/10">
+              className="text-blue-400 border-blue-400/50 bg-blue-400/10"
+            >
               <IconTrendingUp className="w-4 h-4 mr-1" />
               Today&apos;s Rate
             </Badge>
@@ -138,7 +140,8 @@ export function SectionCards({ data }: { data: SectionCardsProps }) {
           <CardAction>
             <Badge
               variant="outline"
-              className="text-purple-400 border-purple-400/50 bg-purple-400/10">
+              className="text-purple-400 border-purple-400/50 bg-purple-400/10"
+            >
               <IconTrendingUp className="w-4 h-4 mr-1" />
               +4.5%
             </Badge>

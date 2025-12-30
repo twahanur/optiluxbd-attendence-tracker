@@ -67,7 +67,7 @@ export interface CreateEmployeeRequest {
   department: string;
   section?: string;
   password: string;
-  role: 'ADMIN' | 'EMPLOYEE' | 'HR';
+  role: "ADMIN" | "EMPLOYEE" | "HR";
 }
 
 export interface EmployeeResponse {
@@ -83,52 +83,96 @@ export interface EmployeeResponse {
 
 // Password Policy
 export const getPasswordPolicy = async () => {
-  return apiGet<{ passwordPolicy: PasswordPolicy }>("/admin/user-settings/password-policy", {}, "Failed to fetch password policy");
+  return apiGet<{ passwordPolicy: PasswordPolicy }>(
+    "/admin/user-settings/password-policy",
+    {},
+    "Failed to fetch password policy"
+  );
 };
 
 export const updatePasswordPolicy = async (policy: PasswordPolicy) => {
-  return apiPut("/admin/user-settings/password-policy", policy, {}, "Failed to update password policy");
+  return apiPut(
+    "/admin/user-settings/password-policy",
+    policy,
+    {},
+    "Failed to update password policy"
+  );
 };
 
 export const validatePassword = async (data: PasswordValidationRequest) => {
-  return apiPost<PasswordValidationResult>("/admin/user-settings/password-policy/validate", data, {}, "Failed to validate password");
+  return apiPost<PasswordValidationResult>(
+    "/admin/user-settings/password-policy/validate",
+    data,
+    {},
+    "Failed to validate password"
+  );
 };
 
 // Registration Policy
 export const getRegistrationPolicy = async () => {
-  return apiGet<{ registrationPolicy: RegistrationPolicy }>("/admin/user-settings/registration-policy", {}, "Failed to fetch registration policy");
+  return apiGet<{ registrationPolicy: RegistrationPolicy }>(
+    "/admin/user-settings/registration-policy",
+    {},
+    "Failed to fetch registration policy"
+  );
 };
 
 export const updateRegistrationPolicy = async (policy: RegistrationPolicy) => {
-  return apiPut("/admin/user-settings/registration-policy", policy, {}, "Failed to update registration policy");
+  return apiPut(
+    "/admin/user-settings/registration-policy",
+    policy,
+    {},
+    "Failed to update registration policy"
+  );
 };
 
 // Lockout Rules
 export const getLockoutRules = async () => {
-  return apiGet<{ lockoutRules: LockoutRules }>("/admin/user-settings/lockout-rules", {}, "Failed to fetch lockout rules");
+  return apiGet<{ lockoutRules: LockoutRules }>(
+    "/admin/user-settings/lockout-rules",
+    {},
+    "Failed to fetch lockout rules"
+  );
 };
 
 export const updateLockoutRules = async (rules: LockoutRules) => {
-  return apiPut("/admin/user-settings/lockout-rules", rules, {}, "Failed to update lockout rules");
+  return apiPut(
+    "/admin/user-settings/lockout-rules",
+    rules,
+    {},
+    "Failed to update lockout rules"
+  );
 };
 
 // Employee Management
 export const createEmployee = async (data: CreateEmployeeRequest) => {
-  return apiPost<{ 
-    employee: EmployeeResponse; 
-    temporaryPassword: string; 
-    resetRequired: boolean; 
+  return apiPost<{
+    employee: EmployeeResponse;
+    temporaryPassword: string;
+    resetRequired: boolean;
   }>("/admin/employees", data, {}, "Failed to create employee");
 };
 
 // Get all employees
 export const getAllEmployees = async () => {
-  return apiGet<{ employees: EmployeeResponse[]; total: number }>("/admin/employees", {}, "Failed to fetch employees");
+  return apiGet<{ employees: EmployeeResponse[]; total: number }>(
+    "/admin/employees",
+    {},
+    "Failed to fetch employees"
+  );
 };
 
 // Update employee
-export const updateEmployee = async (id: number, data: Partial<CreateEmployeeRequest>) => {
-  return apiPut(`/admin/employees/${id}`, data, {}, "Failed to update employee");
+export const updateEmployee = async (
+  id: number,
+  data: Partial<CreateEmployeeRequest>
+) => {
+  return apiPut(
+    `/admin/employees/${id}`,
+    data,
+    {},
+    "Failed to update employee"
+  );
 };
 
 // Delete employee
@@ -136,7 +180,6 @@ export const deleteEmployee = async (id: number) => {
   return apiDelete(`/admin/employees/${id}`, {}, "Failed to delete employee");
 };
 
-// API object for easier import
 export const userSettingsApi = {
   getPasswordPolicy,
   updatePasswordPolicy,

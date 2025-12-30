@@ -10,6 +10,7 @@ import {
   Mail,
   Database,
   Activity,
+  CircleGauge,
 } from "lucide-react";
 
 export type TNavmain = {
@@ -34,6 +35,11 @@ export const navMain: TNavmain[] = [
     title: "All User",
     url: "/users",
     icon: Users,
+  },
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: CircleGauge,
   },
   {
     title: "Admin Panel",

@@ -497,7 +497,7 @@ const DataTable = ({ data }: { data: TStatsArray }) => {
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <DndContext >
+          <div className="space-y-4">
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -615,11 +615,11 @@ const DataTable = ({ data }: { data: TStatsArray }) => {
                 </div>
               </div>
             </div>
-    
-          </DndContext>
-          </DndContext>
-        </TabsContent>
+          </div>
+        </DndContext>
+      </TabsContent>
 
+      {/* Analytics Tab */}
       <TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
         <AnalyticsTab
           attendanceDataState={attendanceDataState}
@@ -627,6 +627,7 @@ const DataTable = ({ data }: { data: TStatsArray }) => {
         />
       </TabsContent>
 
+      {/* Reports Tab */}
       <TabsContent
         value="focus-documents"
         className="flex flex-col px-4 lg:px-6"

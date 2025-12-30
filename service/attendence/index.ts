@@ -67,7 +67,7 @@ export const getCurrentAttendanceStatus = async () => {
 // Get attendance records by date range
 export const getAttendanceRecords = async (
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ) => {
   const today = new Date().toISOString().split("T")[0];
   const start = startDate || today;
@@ -76,19 +76,19 @@ export const getAttendanceRecords = async (
   return apiGet(
     `/attendance/records?startDate=${start}&endDate=${end}`,
     {},
-    "Failed to fetch attendance records",
+    "Failed to fetch attendance records"
   );
 };
 
 // Get attendance report
 export const getAttendanceReport = async (
   startDate: string,
-  endDate: string,
+  endDate: string
 ) => {
   return apiGet(
     `/attendance/report?startDate=${startDate}&endDate=${endDate}`,
     {},
-    "Failed to fetch attendance report",
+    "Failed to fetch attendance report"
   );
 };
 
@@ -96,7 +96,7 @@ export const getAttendanceReport = async (
 // Get all employees attendance
 export const getAllEmployeesAttendance = async (
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ) => {
   const today = new Date().toISOString().split("T")[0];
   const start = startDate || today;
@@ -105,20 +105,20 @@ export const getAllEmployeesAttendance = async (
   return apiGet(
     `/admin/attendance/records?startDate=${start}&endDate=${end}`,
     {},
-    "Failed to fetch all employees attendance",
+    "Failed to fetch all employees attendance"
   );
 };
 
 // Update attendance record (admin)
 export const updateAttendanceRecord = async (
   id: number,
-  data: Partial<AttendanceRecord>,
+  data: Partial<AttendanceRecord>
 ) => {
   return apiPut(
     `/admin/attendance/records/${id}`,
     data,
     {},
-    "Failed to update attendance record",
+    "Failed to update attendance record"
   );
 };
 
@@ -127,6 +127,6 @@ export const deleteAttendanceRecord = async (id: number) => {
   return apiDelete(
     `/admin/attendance/records/${id}`,
     {},
-    "Failed to delete attendance record",
+    "Failed to delete attendance record"
   );
 };

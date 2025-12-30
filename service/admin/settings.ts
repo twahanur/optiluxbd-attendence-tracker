@@ -29,7 +29,7 @@ export interface CategorySettingsResponse {
   message: string;
   data: {
     category: string;
-    settings: Omit<Setting, 'id' | 'createdAt' | 'updatedAt'>[];
+    settings: Omit<Setting, "id" | "createdAt" | "updatedAt">[];
     count: number;
   };
   timestamp: string;
@@ -50,15 +50,21 @@ export interface BulkUpdateRequest {
   }>;
 }
 
-
-
 // Get all settings
 export const getAllSettings = async () => {
-  return apiGet<SettingsResponse>("/admin/settings", {}, "Failed to fetch settings");
+  return apiGet<SettingsResponse>(
+    "/admin/settings",
+    {},
+    "Failed to fetch settings"
+  );
 };
 // Get settings by category
 export const getSettingsByCategory = async (category: string) => {
-  return apiGet<CategorySettingsResponse>(`/admin/settings/category/${category}`, {}, `Failed to fetch ${category} settings`);
+  return apiGet<CategorySettingsResponse>(
+    `/admin/settings/category/${category}`,
+    {},
+    `Failed to fetch ${category} settings`
+  );
 };
 
 // Create new setting
@@ -68,12 +74,22 @@ export const createSetting = async (data: CreateSettingRequest) => {
 
 // Update setting
 export const updateSetting = async (key: string, value: string) => {
-  return apiPut(`/admin/settings/${key}`, { value }, {}, "Failed to update setting");
+  return apiPut(
+    `/admin/settings/${key}`,
+    { value },
+    {},
+    "Failed to update setting"
+  );
 };
 
 // Bulk update settings
 export const bulkUpdateSettings = async (data: BulkUpdateRequest) => {
-  return apiPut("/admin/settings/bulk", data, {}, "Failed to bulk update settings");
+  return apiPut(
+    "/admin/settings/bulk",
+    data,
+    {},
+    "Failed to bulk update settings"
+  );
 };
 
 // Delete setting
@@ -81,7 +97,6 @@ export const deleteSetting = async (key: string) => {
   return apiDelete(`/admin/settings/${key}`, {}, "Failed to delete setting");
 };
 
-// API object for settings
 export const settingsApi = {
   getAll: getAllSettings,
   getByCategory: getSettingsByCategory,
