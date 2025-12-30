@@ -66,11 +66,11 @@ export default function AdminSettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Settings</h1>
-          <p className="text-gray-600 mt-2">Manage system configuration, company settings, and user policies</p>
+          <h1 className="text-3xl font-bold text-white">Admin Settings</h1>
+          <p className="text-gray-200 mt-2">Manage system configuration, company settings, and user policies</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200">
+          <Badge variant="outline" className="text-green-300 border-green-500/40">
             <Shield className="w-3 h-3 mr-1" />
             Admin Access
           </Badge>
@@ -79,7 +79,7 @@ export default function AdminSettingsPage() {
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 border border-white/20">
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             return (
@@ -96,13 +96,13 @@ export default function AdminSettingsPage() {
           const ComponentToRender = tab.component;
           return (
             <TabsContent key={tab.id} value={tab.id} className="space-y-6">
-              <Card>
+              <Card className="border-white/20">
                 <CardHeader>
                   <div className="flex items-center space-x-3">
-                    <tab.icon className="w-6 h-6 text-primary" />
+                    <tab.icon className="w-6 h-6 text-purple-400" />
                     <div>
-                      <CardTitle>{tab.label}</CardTitle>
-                      <CardDescription>{tab.description}</CardDescription>
+                      <CardTitle className="text-white">{tab.label}</CardTitle>
+                      <CardDescription className="text-gray-200">{tab.description}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>

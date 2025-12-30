@@ -111,14 +111,14 @@ export default function SystemHealth() {
     switch (status) {
       case 'connected':
       case 'active':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-green-400" />;
       case 'disconnected':
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-red-400" />;
       case 'paused':
-        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+        return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
       default:
-        return <AlertTriangle className="w-5 h-5 text-gray-600" />;
+        return <AlertTriangle className="w-5 h-5 text-gray-400" />;
     }
   };
 
@@ -126,22 +126,22 @@ export default function SystemHealth() {
     switch (status) {
       case 'connected':
       case 'active':
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+        return <Badge className="text-green-300 border-green-500/40">Active</Badge>;
       case 'disconnected':
       case 'error':
-        return <Badge variant="destructive">Error</Badge>;
+        return <Badge className="text-red-300 border-red-500/40">Error</Badge>;
       case 'paused':
-        return <Badge variant="secondary">Paused</Badge>;
+        return <Badge className="text-yellow-300 border-yellow-500/40">Paused</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge className="text-gray-300 border-gray-500/40">Unknown</Badge>;
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Loading system status...</span>
+        <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+        <span className="ml-2 text-white">Loading system status...</span>
       </div>
     );
   }
@@ -151,8 +151,8 @@ export default function SystemHealth() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">System Health Dashboard</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-lg font-medium text-white">System Health Dashboard</h3>
+          <p className="text-sm text-gray-200">
             Monitor system status, performance metrics, and test functionality
           </p>
         </div>
@@ -160,7 +160,7 @@ export default function SystemHealth() {
           onClick={handleRefreshStatus}
           disabled={refreshing}
           variant="outline"
-          className="flex items-center space-x-2"
+          className="flex items-center space-x-2 border-white/20 text-white hover:border-white/40"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           <span>Refresh Status</span>
@@ -169,54 +169,54 @@ export default function SystemHealth() {
 
       {/* System Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-white/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">System Uptime</p>
-                <p className="text-lg font-semibold">{systemMetrics.uptime}</p>
+                <p className="text-sm text-gray-200">System Uptime</p>
+                <p className="text-lg font-semibold text-white">{systemMetrics.uptime}</p>
               </div>
-              <Activity className="w-8 h-8 text-blue-600" />
+              <Activity className="w-8 h-8 text-blue-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Users</p>
-                <p className="text-lg font-semibold">
+                <p className="text-sm text-gray-200">Active Users</p>
+                <p className="text-lg font-semibold text-white">
                   {systemMetrics.activeUsers}/{systemMetrics.totalUsers}
                 </p>
               </div>
-              <Users className="w-8 h-8 text-green-600" />
+              <Users className="w-8 h-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Database Size</p>
-                <p className="text-lg font-semibold">{systemMetrics.databaseSize}</p>
+                <p className="text-sm text-gray-200">Database Size</p>
+                <p className="text-lg font-semibold text-white">{systemMetrics.databaseSize}</p>
               </div>
-              <Database className="w-8 h-8 text-purple-600" />
+              <Database className="w-8 h-8 text-purple-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Email Status</p>
-                <p className="text-lg font-semibold">
+                <p className="text-sm text-gray-200">Email Status</p>
+                <p className="text-lg font-semibold text-white">
                   {emailSystemStatus?.isConfigured ? 'Configured' : 'Not Set'}
                 </p>
               </div>
-              <Mail className={`w-8 h-8 ${emailSystemStatus?.isConfigured ? 'text-green-600' : 'text-red-600'}`} />
+              <Mail className={`w-8 h-8 ${emailSystemStatus?.isConfigured ? 'text-green-400' : 'text-red-400'}`} />
             </div>
           </CardContent>
         </Card>
@@ -224,9 +224,9 @@ export default function SystemHealth() {
 
       {/* Email System Status */}
       {emailSystemStatus && (
-        <Card>
+        <Card className="border-white/20">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-white">
               <Mail className="w-5 h-5" />
               <span>Email System Status</span>
             </CardTitle>
@@ -234,95 +234,100 @@ export default function SystemHealth() {
           <CardContent className="space-y-6">
             {/* Email Configuration Status */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center space-x-3 p-4 border rounded-lg">
+              <div className="flex items-center space-x-3 p-4 border border-white/20 bg-white/5 rounded-lg">
                 {getStatusIcon(emailSystemStatus.smtpStatus)}
                 <div>
-                  <p className="font-medium">SMTP Connection</p>
-                  <p className="text-sm text-muted-foreground capitalize">{emailSystemStatus.smtpStatus}</p>
+                  <p className="font-medium text-white">SMTP Connection</p>
+                  <p className="text-sm text-gray-200 capitalize">{emailSystemStatus.smtpStatus}</p>
                 </div>
               </div>
 
-              <div className="text-center p-4 border rounded-lg">
-                <p className="text-2xl font-bold text-primary">{emailSystemStatus.emailsSentToday}</p>
-                <p className="text-sm text-muted-foreground">Emails Sent Today</p>
+              <div className="text-center p-4 border border-white/20 bg-white/5 rounded-lg">
+                <p className="text-2xl font-bold text-purple-400">{emailSystemStatus.emailsSentToday}</p>
+                <p className="text-sm text-gray-200">Emails Sent Today</p>
               </div>
 
-              <div className="text-center p-4 border rounded-lg">
-                <p className={`text-2xl font-bold ${emailSystemStatus.failedEmailsToday > 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <div className="text-center p-4 border border-white/20 bg-white/5 rounded-lg">
+                <p className={`text-2xl font-bold ${emailSystemStatus.failedEmailsToday > 0 ? 'text-red-400' : 'text-green-400'}`}>
                   {emailSystemStatus.failedEmailsToday}
                 </p>
-                <p className="text-sm text-muted-foreground">Failed Emails Today</p>
+                <p className="text-sm text-gray-200">Failed Emails Today</p>
               </div>
             </div>
 
             {/* Active Email Jobs */}
             <div>
-              <h4 className="font-medium mb-3">Scheduled Email Jobs</h4>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Job Name</TableHead>
-                    <TableHead>Schedule</TableHead>
-                    <TableHead>Next Run</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {emailSystemStatus.activeJobs.map((job, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{job.name}</TableCell>
-                      <TableCell className="font-mono text-sm">{job.schedule}</TableCell>
-                      <TableCell>{new Date(job.nextRun).toLocaleString()}</TableCell>
-                      <TableCell>{getStatusBadge(job.status)}</TableCell>
+              <h4 className="font-medium mb-3 text-white">Scheduled Email Jobs</h4>
+              <div className="bg-white/5 border border-white/20 rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/20 hover:bg-white/5">
+                      <TableHead className="text-gray-200">Job Name</TableHead>
+                      <TableHead className="text-gray-200">Schedule</TableHead>
+                      <TableHead className="text-gray-200">Next Run</TableHead>
+                      <TableHead className="text-gray-200">Status</TableHead>
                     </TableRow>
-                  ))}
-                  {emailSystemStatus.activeJobs.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-4">
-                        No scheduled email jobs found
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {emailSystemStatus.activeJobs.map((job, index) => (
+                      <TableRow key={index} className="border-white/20 hover:bg-white/5">
+                        <TableCell className="font-medium text-white">{job.name}</TableCell>
+                        <TableCell className="font-mono text-sm text-gray-200">{job.schedule}</TableCell>
+                        <TableCell className="text-gray-200">{new Date(job.nextRun).toLocaleString()}</TableCell>
+                        <TableCell>{getStatusBadge(job.status)}</TableCell>
+                      </TableRow>
+                    ))}
+                    {emailSystemStatus.activeJobs.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-gray-200 py-4">
+                          No scheduled email jobs found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
 
             {/* Email Test Form */}
-            <Card className="border-dashed">
+            <Card className="border-dashed border-white/30 bg-white/5">
               <CardHeader>
-                <CardTitle className="text-base">Send Test Email</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-base text-white">Send Test Email</CardTitle>
+                <CardDescription className="text-gray-200">
                   Test your email configuration by sending a test message
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="testEmailTo">Send To *</Label>
+                    <Label htmlFor="testEmailTo" className="text-white">Send To *</Label>
                     <Input
                       id="testEmailTo"
                       type="email"
                       value={testEmail.email}
                       onChange={(e) => setTestEmail({ ...testEmail, email: e.target.value })}
                       placeholder="admin@company.com"
+                      className="border-white/20 text-white placeholder:text-gray-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="testEmailSubject">Subject</Label>
+                    <Label htmlFor="testEmailSubject" className="text-white">Subject</Label>
                     <Input
                       id="testEmailSubject"
                       value={testEmail.subject}
                       onChange={(e) => setTestEmail({ ...testEmail, subject: e.target.value })}
+                      className="border-white/20 text-white placeholder:text-gray-400"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="testEmailMessage">Message</Label>
+                  <Label htmlFor="testEmailMessage" className="text-white">Message</Label>
                   <Textarea
                     id="testEmailMessage"
                     value={testEmail.message}
                     onChange={(e) => setTestEmail({ ...testEmail, message: e.target.value })}
                     rows={3}
+                    className="border-white/20 text-white placeholder:text-gray-400"
                   />
                 </div>
                 <div className="flex justify-end">
@@ -342,9 +347,9 @@ export default function SystemHealth() {
       )}
 
       {/* System Performance Metrics */}
-      <Card>
+      <Card className="border-white/20">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-white">
             <TrendingUp className="w-5 h-5" />
             <span>System Performance</span>
           </CardTitle>
@@ -353,12 +358,12 @@ export default function SystemHealth() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm font-medium">Memory Usage</span>
-                <span className="text-sm text-muted-foreground">{systemMetrics.memoryUsage}%</span>
+                <span className="text-sm font-medium text-white">Memory Usage</span>
+                <span className="text-sm text-gray-200">{systemMetrics.memoryUsage}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-white/20 rounded-full h-2">
                 <div 
-                  className={`h-2 rounded-full ${systemMetrics.memoryUsage > 80 ? 'bg-red-600' : systemMetrics.memoryUsage > 60 ? 'bg-yellow-600' : 'bg-green-600'}`}
+                  className={`h-2 rounded-full ${systemMetrics.memoryUsage > 80 ? 'bg-red-400' : systemMetrics.memoryUsage > 60 ? 'bg-yellow-400' : 'bg-green-400'}`}
                   style={{ width: `${systemMetrics.memoryUsage}%` }}
                 ></div>
               </div>
@@ -366,12 +371,12 @@ export default function SystemHealth() {
 
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm font-medium">CPU Usage</span>
-                <span className="text-sm text-muted-foreground">{systemMetrics.cpuUsage}%</span>
+                <span className="text-sm font-medium text-white">CPU Usage</span>
+                <span className="text-sm text-gray-200">{systemMetrics.cpuUsage}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-white/20 rounded-full h-2">
                 <div 
-                  className={`h-2 rounded-full ${systemMetrics.cpuUsage > 80 ? 'bg-red-600' : systemMetrics.cpuUsage > 60 ? 'bg-yellow-600' : 'bg-green-600'}`}
+                  className={`h-2 rounded-full ${systemMetrics.cpuUsage > 80 ? 'bg-red-400' : systemMetrics.cpuUsage > 60 ? 'bg-yellow-400' : 'bg-green-400'}`}
                   style={{ width: `${systemMetrics.cpuUsage}%` }}
                 ></div>
               </div>
@@ -379,12 +384,12 @@ export default function SystemHealth() {
 
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm font-medium">Disk Usage</span>
-                <span className="text-sm text-muted-foreground">{systemMetrics.diskUsage}%</span>
+                <span className="text-sm font-medium text-white">Disk Usage</span>
+                <span className="text-sm text-gray-200">{systemMetrics.diskUsage}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-white/20 rounded-full h-2">
                 <div 
-                  className={`h-2 rounded-full ${systemMetrics.diskUsage > 80 ? 'bg-red-600' : systemMetrics.diskUsage > 60 ? 'bg-yellow-600' : 'bg-green-600'}`}
+                  className={`h-2 rounded-full ${systemMetrics.diskUsage > 80 ? 'bg-red-400' : systemMetrics.diskUsage > 60 ? 'bg-yellow-400' : 'bg-green-400'}`}
                   style={{ width: `${systemMetrics.diskUsage}%` }}
                 ></div>
               </div>
@@ -394,9 +399,9 @@ export default function SystemHealth() {
       </Card>
 
       {/* System Information */}
-      <Card>
+      <Card className="border-white/20">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 text-white">
             <Settings className="w-5 h-5" />
             <span>System Information</span>
           </CardTitle>
@@ -405,35 +410,39 @@ export default function SystemHealth() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="font-medium">Last System Backup</span>
-                <span className="text-muted-foreground">
+                <span className="font-medium text-white">Last System Backup</span>
+                <span className="text-gray-200">
                   {new Date(systemMetrics.lastBackup).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Total Registered Users</span>
-                <span className="text-muted-foreground">{systemMetrics.totalUsers}</span>
+                <span className="font-medium text-white">Total Registered Users</span>
+                <span className="text-gray-200">{systemMetrics.totalUsers}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Database Size</span>
                 <span className="text-muted-foreground">{systemMetrics.databaseSize}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-white">Database Size</span>
+                <span className="text-gray-200">{systemMetrics.databaseSize}</span>
+              </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="font-medium">Email System</span>
-                <span className={`${emailSystemStatus?.isConfigured ? 'text-green-600' : 'text-red-600'}`}>
+                <span className="font-medium text-white">Email System</span>
+                <span className={`${emailSystemStatus?.isConfigured ? 'text-green-400' : 'text-red-400'}`}>
                   {emailSystemStatus?.isConfigured ? 'Configured' : 'Not Configured'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">System Status</span>
-                <span className="text-green-600">Healthy</span>
+                <span className="font-medium text-white">System Status</span>
+                <span className="text-green-400">Healthy</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Last Status Check</span>
-                <span className="text-muted-foreground">
+                <span className="font-medium text-white">Last Status Check</span>
+                <span className="text-gray-200">
                   {new Date().toLocaleTimeString()}
                 </span>
               </div>
@@ -445,7 +454,7 @@ export default function SystemHealth() {
       {/* System Alerts */}
       <div className="space-y-3">
         {emailSystemStatus?.failedEmailsToday && emailSystemStatus.failedEmailsToday > 0 && (
-          <Alert>
+          <Alert className="border-yellow-500/40 text-yellow-200">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               {emailSystemStatus.failedEmailsToday} email(s) failed to send today. Please check your SMTP configuration.
@@ -454,7 +463,7 @@ export default function SystemHealth() {
         )}
 
         {systemMetrics.memoryUsage > 80 && (
-          <Alert>
+          <Alert className="border-orange-500/40 text-orange-200">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Memory usage is high ({systemMetrics.memoryUsage}%). Consider monitoring system performance.
@@ -463,7 +472,7 @@ export default function SystemHealth() {
         )}
 
         {!emailSystemStatus?.isConfigured && (
-          <Alert>
+          <Alert className="border-amber-500/40 text-amber-200">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               Email system is not configured. Please configure SMTP settings to enable email notifications.

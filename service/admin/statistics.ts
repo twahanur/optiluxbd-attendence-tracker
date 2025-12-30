@@ -2,7 +2,6 @@
 
 import { config } from "@/config";
 import { getValidToken } from "@/service/auth/validToken";
-import { logout } from "../auth";
 
 export const GetStatistics = async () => {
   try {

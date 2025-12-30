@@ -144,6 +144,7 @@ const DataTable = ({ data }: { data: TStatsArray }) => {
   );
 
   // Attendance table
+  // eslint-disable-next-line react-hooks/incompatible-library
   const attendanceTable = useReactTable({
     data: attendanceDataState,
     columns: attendanceColumns,
