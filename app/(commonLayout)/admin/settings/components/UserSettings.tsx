@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { 
@@ -16,12 +15,12 @@ import {
   Users, 
   Lock, 
   UserPlus, 
-  Trash2, 
   Loader2, 
   CheckCircle, 
   XCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { EmployeeManagement } from '@/components/admin';
 
 import { 
   userSettingsApi, 
@@ -29,8 +28,6 @@ import {
   RegistrationPolicy, 
   LockoutRules, 
   PasswordValidationResult,
-  CreateEmployeeRequest,
-  EmployeeResponse 
 } from '@/service/admin';
 
 export default function UserSettings() {
@@ -75,25 +72,12 @@ export default function UserSettings() {
     progressiveDelay: true,
   });
 
-  // Employee Management State
-  const [employees, setEmployees] = useState<EmployeeResponse[]>([]);
-  const [newEmployee, setNewEmployee] = useState<CreateEmployeeRequest>({
-    email: '',
-    name: '',
-    department: '',
-    section: '',
-    password: '',
-    role: 'EMPLOYEE',
-  });
-  const [showNewEmployeeForm, setShowNewEmployeeForm] = useState(false);
-
   // Password Validation State
   const [testPassword, setTestPassword] = useState('');
   const [validationResult, setValidationResult] = useState<PasswordValidationResult | null>(null);
 
   useEffect(() => {
     loadUserSettings();
-    loadEmployees();
   }, []);
 
   const loadUserSettings = async () => {
@@ -120,17 +104,6 @@ export default function UserSettings() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadEmployees = async () => {
-    try {
-      const response = await userSettingsApi.getAllEmployees();
-      if (response.data?.employees) {
-        setEmployees(response.data.employees);
-      }
-    } catch (error) {
-      console.error('Failed to load employees:', error);
     }
   };
 
@@ -173,38 +146,6 @@ export default function UserSettings() {
     }
   };
 
-  const handleCreateEmployee = async () => {
-    if (!newEmployee.email || !newEmployee.name || !newEmployee.department || !newEmployee.password) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    try {
-      setSaving(true);
-      const response = await userSettingsApi.createEmployee(newEmployee);
-      if (response.data?.temporaryPassword) {
-        toast.success(`Employee created successfully. Temporary password: ${response.data.temporaryPassword}`);
-      } else {
-        toast.success('Employee created successfully');
-      }
-      setNewEmployee({
-        email: '',
-        name: '',
-        department: '',
-        section: '',
-        password: '',
-        role: 'EMPLOYEE',
-      });
-      setShowNewEmployeeForm(false);
-      loadEmployees();
-    } catch (error) {
-      toast.error('Failed to create employee');
-      console.error(error);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleValidatePassword = async () => {
     if (!testPassword) return;
 
@@ -220,19 +161,6 @@ export default function UserSettings() {
     }
   };
 
-  const handleDeleteEmployee = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this employee?')) return;
-
-    try {
-      await userSettingsApi.deleteEmployee(id);
-      toast.success('Employee deleted successfully');
-      loadEmployees();
-    } catch (error) {
-      toast.error('Failed to delete employee');
-      console.error(error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -244,20 +172,32 @@ export default function UserSettings() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="password" className="flex items-center space-x-2">
+      <TabsList className="grid w-full grid-cols-4 border border-white/20 bg-white/5 text-white/90 backdrop-blur-sm">
+        <TabsTrigger
+          value="password"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Shield className="w-4 h-4" />
           <span>Password Policy</span>
         </TabsTrigger>
-        <TabsTrigger value="registration" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="registration"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <UserPlus className="w-4 h-4" />
           <span>Registration</span>
         </TabsTrigger>
-        <TabsTrigger value="lockout" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="lockout"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Lock className="w-4 h-4" />
           <span>Lockout Rules</span>
         </TabsTrigger>
-        <TabsTrigger value="employees" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="employees"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Users className="w-4 h-4" />
           <span>Employees</span>
         </TabsTrigger>
@@ -653,165 +593,9 @@ export default function UserSettings() {
         </Card>
       </TabsContent>
 
-      {/* Employees Tab */}
-      <TabsContent value="employees" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Employee Management</CardTitle>
-                <CardDescription>Create and manage employee accounts</CardDescription>
-              </div>
-              <Button 
-                onClick={() => setShowNewEmployeeForm(!showNewEmployeeForm)}
-                className="flex items-center space-x-2"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>Add Employee</span>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* New Employee Form */}
-            {showNewEmployeeForm && (
-              <Card className="border-dashed">
-                <CardContent className="pt-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="empEmail">Email *</Label>
-                      <Input
-                        id="empEmail"
-                        type="email"
-                        value={newEmployee.email}
-                        onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
-                        placeholder="employee@company.com"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="empName">Full Name *</Label>
-                      <Input
-                        id="empName"
-                        value={newEmployee.name}
-                        onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
-                        placeholder="John Doe"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="empDepartment">Department *</Label>
-                      <Input
-                        id="empDepartment"
-                        value={newEmployee.department}
-                        onChange={(e) => setNewEmployee({ ...newEmployee, department: e.target.value })}
-                        placeholder="HR, IT, Sales"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="empSection">Section</Label>
-                      <Input
-                        id="empSection"
-                        value={newEmployee.section}
-                        onChange={(e) => setNewEmployee({ ...newEmployee, section: e.target.value })}
-                        placeholder="Optional"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="empRole">Role</Label>
-                      <Select 
-                        value={newEmployee.role} 
-                        onValueChange={(value: 'ADMIN' | 'EMPLOYEE' | 'HR') => setNewEmployee({ ...newEmployee, role: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                          <SelectItem value="HR">HR</SelectItem>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="empPassword">Temporary Password *</Label>
-                    <Input
-                      id="empPassword"
-                      type="password"
-                      value={newEmployee.password}
-                      onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
-                      placeholder="Temporary password"
-                    />
-                    <p className="text-sm text-muted-foreground">Employee will be required to change this on first login</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button onClick={handleCreateEmployee} disabled={saving}>
-                      {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                      Create Employee
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowNewEmployeeForm(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Employees Table */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-25">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {employees.map((employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell className="font-medium">{employee.name}</TableCell>
-                    <TableCell>{employee.email}</TableCell>
-                    <TableCell>{employee.department}</TableCell>
-                    <TableCell>
-                      <Badge variant={employee.role === 'ADMIN' ? 'default' : 'secondary'}>
-                        {employee.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={employee.isActive ? 'default' : 'secondary'}>
-                        {employee.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(employee.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteEmployee(employee.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {employees.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
-                      No employees found. Create your first employee above.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      {/* Employees Tab - Using EmployeeManagement Component */}
+      <TabsContent value="employees">
+        <EmployeeManagement />
       </TabsContent>
     </Tabs>
   );

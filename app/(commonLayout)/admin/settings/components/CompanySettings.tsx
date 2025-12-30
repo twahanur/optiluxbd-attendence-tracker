@@ -164,16 +164,25 @@ export default function CompanySettings() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="profile" className="flex items-center space-x-2">
+      <TabsList className="grid w-full grid-cols-3 border border-white/20 bg-white/5 text-white/90 backdrop-blur-sm">
+        <TabsTrigger
+          value="profile"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Building2 className="w-4 h-4" />
           <span>Company Profile</span>
         </TabsTrigger>
-        <TabsTrigger value="hours" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="hours"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Clock className="w-4 h-4" />
           <span>Working Hours</span>
         </TabsTrigger>
-        <TabsTrigger value="holidays" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="holidays"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Calendar className="w-4 h-4" />
           <span>Holidays</span>
         </TabsTrigger>

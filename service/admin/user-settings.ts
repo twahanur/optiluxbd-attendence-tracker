@@ -156,7 +156,7 @@ export const createEmployee = async (data: CreateEmployeeRequest) => {
 // Get all employees
 export const getAllEmployees = async () => {
   return apiGet<{ employees: EmployeeResponse[]; total: number }>(
-    "/admin/employees",
+    "/users/employees",
     {},
     "Failed to fetch employees"
   );

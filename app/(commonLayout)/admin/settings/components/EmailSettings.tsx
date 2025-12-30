@@ -189,16 +189,25 @@ export default function EmailSettings() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="smtp" className="flex items-center space-x-2">
+      <TabsList className="grid w-full grid-cols-3 border border-white/20 bg-white/5 text-white/90 backdrop-blur-sm">
+        <TabsTrigger
+          value="smtp"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <Server className="w-4 h-4" />
           <span>SMTP Config</span>
         </TabsTrigger>
-        <TabsTrigger value="templates" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="templates"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <BookTemplate className="w-4 h-4" />
           <span>Templates</span>
         </TabsTrigger>
-        <TabsTrigger value="test" className="flex items-center space-x-2">
+        <TabsTrigger
+          value="test"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
           <TestTube className="w-4 h-4" />
           <span>Test & Status</span>
         </TabsTrigger>

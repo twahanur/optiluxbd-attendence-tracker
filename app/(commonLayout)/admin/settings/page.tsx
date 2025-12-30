@@ -79,11 +79,15 @@ export default function AdminSettingsPage() {
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 border border-white/20">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 border border-white/20 bg-white/5 text-white/90 backdrop-blur-sm">
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             return (
-              <TabsTrigger key={tab.id} value={tab.id} className="flex items-center space-x-2">
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+              >
                 <IconComponent className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </TabsTrigger>
