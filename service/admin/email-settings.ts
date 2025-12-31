@@ -51,7 +51,7 @@ export interface TestEmailRequest {
 // SMTP Configuration
 export const getSMTPConfig = async () => {
   return apiGet<{ smtp: SMTPConfig }>(
-    "/admin/settings/email/smtp",
+    "/settings/email/smtp",
     {},
     "Failed to fetch SMTP config"
   );
@@ -59,7 +59,7 @@ export const getSMTPConfig = async () => {
 
 export const updateSMTPConfig = async (smtpConfig: SMTPConfig) => {
   return apiPut(
-    "/admin/settings/email/smtp",
+    "/settings/email/smtp",
     smtpConfig,
     {},
     "Failed to update SMTP config"
@@ -71,12 +71,7 @@ export const testSMTPConnection = async () => {
     connectionStatus: string;
     testTime: string;
     serverResponse: string;
-  }>(
-    "/admin/settings/email/smtp/test",
-    {},
-    {},
-    "Failed to test SMTP connection"
-  );
+  }>("/settings/email/smtp/test", {}, {}, "Failed to test SMTP connection");
 };
 
 // Email Templates
@@ -84,12 +79,12 @@ export const getAllTemplates = async () => {
   return apiGet<{
     templates: Partial<EmailTemplates>;
     count: number;
-  }>("/admin/settings/email/templates", {}, "Failed to fetch email templates");
+  }>("/settings/email/templates", {}, "Failed to fetch email templates");
 };
 
 export const getTemplate = async (templateName: keyof EmailTemplates) => {
   return apiGet<{ template: EmailTemplate }>(
-    `/admin/settings/email/templates/${templateName}`,
+    `/settings/email/templates/${templateName}`,
     {},
     `Failed to fetch ${templateName} template`
   );
@@ -100,7 +95,7 @@ export const updateTemplate = async (
   template: EmailTemplate
 ) => {
   return apiPut(
-    `/admin/settings/email/templates/${templateName}`,
+    `/settings/email/templates/${templateName}`,
     template,
     {},
     `Failed to update ${templateName} template`
@@ -118,12 +113,7 @@ export const getEmailSystemStatus = async () => {
 
 // Test Email
 export const sendTestEmail = async (testData: TestEmailRequest) => {
-  return apiPost(
-    "/admin/test-email",
-    testData,
-    {},
-    "Failed to send test email"
-  );
+  return apiPost("/test-email", testData, {}, "Failed to send test email");
 };
 
 export const emailSettingsApi = {
@@ -138,5 +128,3 @@ export const emailSettingsApi = {
   getSystemStatus: getEmailSystemStatus,
   sendTestEmail: sendTestEmail,
 };
-
-

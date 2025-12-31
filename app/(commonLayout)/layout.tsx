@@ -1,12 +1,15 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { getCurrentUser } from "@/service/auth";
 
-const CommonLayout = ({
+const CommonLayout = async ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
+  const userInfo = await getCurrentUser();
+
   return (
     <section className="px-10 py-4">
       <SidebarProvider
@@ -17,7 +20,7 @@ const CommonLayout = ({
           } as React.CSSProperties
         }
       >
-        <AppSidebar variant="inset" />
+        <AppSidebar variant="inset" role={userInfo?.role} />
         <SidebarInset>
           <SiteHeader />
           {children}

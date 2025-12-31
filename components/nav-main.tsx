@@ -6,28 +6,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LucideIcon } from "lucide-react";
+import { TNavmain } from "@/const/attendenceNavigation";
 import Link from "next/link";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    items?: {
-      title: string;
-      url: string;
-      icon?: LucideIcon;
-    }[];
-  }[];
-}) {
+type TNavmainProps = {
+  adminItem: TNavmain[];
+  userItem: TNavmain[];
+  role: string;
+};
+
+export function NavMain({ adminItem, userItem, role }: TNavmainProps) {
+  const navItem = role === "ADMIN" ? adminItem : userItem;
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
-          {items.map((item) => (
+          {navItem.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton tooltip={item.title}>
                 <Link

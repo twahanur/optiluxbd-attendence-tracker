@@ -4,13 +4,17 @@ import { getCurrentUser, logout } from "./service/auth";
 const authRoutes = ["/login"];
 
 const rolebasedPrivateUser = {
-  EMPLOYEE: [/^\/$/, /^\/profile$/, /^\/settings$/],
+  EMPLOYEE: [/^\/$/, /^\/profile$/],
   ADMIN: [
     /^\/$/,
     /^\/dashboard$/,
     /^\/profile$/,
     /^\/settings$/,
-    /^\/user(\/.*)?$/,
+    /^\/admin$/,
+    /^\/reports$/,
+    /^\/users$/,
+    /^\/users(\/.*)?$/,
+    /^\/admin(\/.*)?$/,
   ],
 };
 
@@ -47,5 +51,17 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/profile", "/settings", "/dashboard", "/user/(.*)"],
+  matcher: [
+    "/",
+    "/profile",
+    "/settings",
+    "/dashboard",
+    "/admin",
+    "/users",
+    "/setup",
+    "/reports",
+    "/users/(.*)",
+    "/admin/(.*)",
+    "/settings/(.*)",
+  ],
 };

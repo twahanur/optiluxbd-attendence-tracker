@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { navMain } from "@/const/attendenceNavigation";
+import { navMain, navMainUser } from "@/const/attendenceNavigation";
 import LogoutButton from "./ui/LogoutButton";
 
 const data = {
@@ -44,7 +44,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain
+          adminItem={navMain}
+          userItem={navMainUser}
+          role={props?.role as string}
+        />
       </SidebarContent>
       <SidebarFooter>
         <LogoutButton />

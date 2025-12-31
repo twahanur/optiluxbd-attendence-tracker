@@ -52,16 +52,12 @@ export interface BulkUpdateRequest {
 
 // Get all settings
 export const getAllSettings = async () => {
-  return apiGet<SettingsResponse>(
-    "/admin/settings",
-    {},
-    "Failed to fetch settings"
-  );
+  return apiGet<SettingsResponse>("/settings", {}, "Failed to fetch settings");
 };
 // Get settings by category
 export const getSettingsByCategory = async (category: string) => {
   return apiGet<CategorySettingsResponse>(
-    `/admin/settings/category/${category}`,
+    `/settings/category/${category}`,
     {},
     `Failed to fetch ${category} settings`
   );
@@ -69,32 +65,22 @@ export const getSettingsByCategory = async (category: string) => {
 
 // Create new setting
 export const createSetting = async (data: CreateSettingRequest) => {
-  return apiPost("/admin/settings", data, {}, "Failed to create setting");
+  return apiPost("/settings", data, {}, "Failed to create setting");
 };
 
 // Update setting
 export const updateSetting = async (key: string, value: string) => {
-  return apiPut(
-    `/admin/settings/${key}`,
-    { value },
-    {},
-    "Failed to update setting"
-  );
+  return apiPut(`/settings/${key}`, { value }, {}, "Failed to update setting");
 };
 
 // Bulk update settings
 export const bulkUpdateSettings = async (data: BulkUpdateRequest) => {
-  return apiPut(
-    "/admin/settings/bulk",
-    data,
-    {},
-    "Failed to bulk update settings"
-  );
+  return apiPut("/settings/bulk", data, {}, "Failed to bulk update settings");
 };
 
 // Delete setting
 export const deleteSetting = async (key: string) => {
-  return apiDelete(`/admin/settings/${key}`, {}, "Failed to delete setting");
+  return apiDelete(`/settings/${key}`, {}, "Failed to delete setting");
 };
 
 export const settingsApi = {

@@ -5,9 +5,6 @@ import {
   Users,
   BarChart3,
   Settings,
-  Shield,
-  Building2,
-  Mail,
   Database,
   Activity,
   CircleGauge,
@@ -20,7 +17,13 @@ export type TNavmain = {
   items?: TNavmain[];
 };
 
+// admin navigation
 export const navMain: TNavmain[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: CircleGauge,
+  },
   {
     title: "Home",
     url: "/",
@@ -36,46 +39,44 @@ export const navMain: TNavmain[] = [
     url: "/users",
     icon: Users,
   },
+
+  {
+    title: "Admin",
+    url: "/admin",
+    icon: Activity,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
+  },
+  {
+    title: "Setup Wizard",
+    url: "/setup",
+    icon: Database,
+  },
+  {
+    title: "Reports",
+    url: "/reports",
+    icon: BarChart3,
+  },
+];
+
+// user navigation
+export const navMainUser: TNavmain[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: CircleGauge,
   },
   {
-    title: "Admin Panel",
-    url: "/admin",
-    icon: Shield,
-    items: [
-      {
-        title: "Dashboard",
-        url: "/admin",
-        icon: Activity,
-      },
-      {
-        title: "Settings",
-        url: "/admin/settings",
-        icon: Settings,
-      },
-      {
-        title: "Setup Wizard",
-        url: "/admin/setup",
-        icon: Database,
-      },
-      {
-        title: "Company Settings",
-        url: "/admin/settings?tab=company",
-        icon: Building2,
-      },
-      {
-        title: "Email Config",
-        url: "/admin/settings?tab=email",
-        icon: Mail,
-      },
-    ],
+    title: "Home",
+    url: "/",
+    icon: Home,
   },
   {
-    title: "Reports",
-    url: "/admin/reports",
-    icon: BarChart3,
+    title: "Profile",
+    url: "/profile",
+    icon: User,
   },
 ];
