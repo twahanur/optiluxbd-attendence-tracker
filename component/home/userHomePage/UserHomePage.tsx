@@ -11,28 +11,12 @@ import {
 } from "@radix-ui/react-dropdown-menu";
 import { getDay, getDaysInMonth } from "date-fns";
 import { useState } from "react";
-import { mockAttendanceStats } from "@/const/statsData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
+import MoodDistribution from "./MoodDistribution";
+import AbsentModal from "./AbsentModal";
+import PresentModal from "./PresentModal";
 
 const weekDays = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-
-const moodColors: Record<string, string> = {
-  EXCELLENT: "text-green-400",
-  GOOD: "text-emerald-400",
-  AVERAGE: "text-yellow-400",
-  POOR: "text-orange-400",
-  TERRIBLE: "text-red-400",
-};
-
-// Mock user data - replace with actual auth context
-const user = { name: "User" };
-
-// Mock logout handler - replace with actual implementation
-const handleLogOut = () => {
-  console.log("Logout clicked");
-  // Add actual logout logic here
-};
+type AttendanceStatus = "present" | "absent" | "off" | "none";
 
 const UserHomePage = () => {
   const [month, setMonth] = useState(new Date().getMonth());
@@ -40,8 +24,9 @@ const UserHomePage = () => {
   const daysInMonth = getDaysInMonth(new Date(year, month));
   const firstDayOfMonth = getDay(new Date(year, month));
   const startOffset = (firstDayOfMonth + 1) % 7;
-
-  const { currentMonthAttendance } = mockAttendanceStats;
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [openAbsentModal, setOpenAbsentModal] = useState(false);
+  const [openPresentModal, setOpenPresentModal] = useState(false);
 
   const now = new Date();
   const todayDate = now.getDate();
@@ -49,6 +34,45 @@ const UserHomePage = () => {
   const todayYear = now.getFullYear();
   const currentHour = now.getHours();
   const isCurrentMonth = month === todayMonth && year === todayYear;
+
+  const attendanceStyles: Record<
+    AttendanceStatus,
+    { bg: string; border: string; text: string; label: string }
+  > = {
+    present: {
+      bg: "bg-green-500/20 hover:bg-green-500/30",
+      border: "border-green-400",
+      text: "text-green-300",
+      label: "Present",
+    },
+    absent: {
+      bg: "bg-red-500/20 hover:bg-red-500/30",
+      border: "border-red-400",
+      text: "text-red-300",
+      label: "Absent",
+    },
+    off: {
+      bg: "bg-yellow-500/20 hover:bg-yellow-500/30",
+      border: "border-yellow-400",
+      text: "text-yellow-300",
+      label: "Off Day",
+    },
+    none: {
+      bg: "bg-white/5 hover:bg-white/10",
+      border: "border-white/10",
+      text: "text-white/80",
+      label: "",
+    },
+  };
+
+  const attendanceMap: Record<number, AttendanceStatus> = {
+    1: "present",
+    2: "absent",
+    3: "off",
+    4: "present",
+    5: "present",
+    6: "absent",
+  };
 
   const isDateClickable = (day: number) => {
     // Must be current month & year
@@ -58,7 +82,7 @@ const UserHomePage = () => {
     if (day !== todayDate) return false;
 
     // Must be after 10 AM
-    if (currentHour < 10) return false;
+    if (currentHour < 1) return false;
 
     return true;
   };
@@ -72,14 +96,16 @@ const UserHomePage = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="default"
-                className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer">
+                className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer"
+              >
                 {months[month]}
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="start"
-              className="bg-white/10 backdrop-blur-2xl text-white">
+              className="bg-white/10 backdrop-blur-2xl text-white"
+            >
               {months.map((m, i) => (
                 <DropdownMenuItem key={i} onClick={() => setMonth(i)}>
                   {m}
@@ -92,14 +118,16 @@ const UserHomePage = () => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="default"
-                className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer">
+                className="w-40 justify-between bg-white/5 backdrop-blur-2xl cursor-pointer"
+              >
                 {year}
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="start"
-              className="bg-white/10 backdrop-blur-2xl text-white">
+              className="bg-white/10 backdrop-blur-2xl text-white"
+            >
               {years.map((m, i) => (
                 <DropdownMenuItem key={i} onClick={() => setYear(m)}>
                   {m}
@@ -107,19 +135,6 @@ const UserHomePage = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-        <div className="flex items-center gap-6">
-          {user ? (
-            <button
-              onClick={handleLogOut}
-              className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
-              Logout
-            </button>
-          ) : (
-            <button className="bg-white/5 px-4 py-1 cursor-pointer rounded-lg text-base">
-              <Link href="/login">Login</Link>
-            </button>
-          )}
         </div>
       </div>
 
@@ -130,7 +145,8 @@ const UserHomePage = () => {
           {weekDays.map((day, i) => (
             <div
               key={i}
-              className="h-12 w-full rounded-md border border-[rgba(34,197,94,0.50)] bg-[rgba(20,83,45,0.10)] p-2 flex justify-center items-center text-sm font-medium">
+              className="h-12 w-full rounded-md border border-[rgba(34,197,94,0.50)] bg-[rgba(20,83,45,0.10)] p-2 flex justify-center items-center text-sm font-medium"
+            >
               {day}
             </div>
           ))}
@@ -144,59 +160,70 @@ const UserHomePage = () => {
           {Array.from({ length: daysInMonth }, (_, i) => {
             const day = i + 1;
             const enabled = isDateClickable(day);
+            const status = attendanceMap[day] ?? "none";
+            const styles = attendanceStyles[status];
+
             return (
-              <button
-                key={day}
-                disabled={!enabled}
-                className={`h-12 w-15 rounded-md border p-3 flex justify-center items-center transition-all ${
-                  enabled
-                    ? "border-green-400 bg-green-500/20 text-white hover:bg-green-500/30 cursor-pointer"
-                    : "border-gray-600 bg-gray-500/10 text-gray-500 cursor-not-allowed"
-                }`}
-                onClick={() => {
-                  if (!enabled) return;
-                  console.log("Clicked today:", day);
-                }}>
-                {day}
-              </button>
+              <DropdownMenu key={day}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    disabled={!enabled}
+                    className={`
+                h-12 w-15 rounded-md border p-2 flex flex-col items-center justify-center gap-1 transition-all ${
+                  styles.bg
+                } ${styles.border} ${styles.text} ${
+                      !enabled
+                        ? "opacity-40 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                  >
+                    <span className="text-sm font-semibold">{day}</span>
+                    {status !== "none" && (
+                      <span className="text-[10px] capitalize">{status}</span>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="center"
+                  className="w-32 bg-white/5 backdrop-blur-3xl"
+                >
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedDay(day);
+                      setOpenPresentModal(true);
+                    }}
+                  >
+                    Present
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedDay(day);
+                      setOpenAbsentModal(true);
+                    }}
+                  >
+                    Absent
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             );
           })}
-        </div>
-        <div className="w-full space-y-3">
-          {/* Mood Distribution */}
-          <Card className="bg-white/5 backdrop-blur-xl sm:col-span-2 text-white p-4 gap-2">
-            <CardHeader className="px-0">
-              <CardTitle className="text-base">Mood Distribution</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1 px-0">
-              {Object.entries(currentMonthAttendance.moodDistribution).map(
-                ([mood, count]) => (
-                  <div key={mood} className="flex justify-between text-xs">
-                    <span className={moodColors[mood]}>{mood}</span>
-                    <span>{count}</span>
-                  </div>
-                ),
-              )}
-            </CardContent>
-          </Card>
 
-          {/* Shift Distribution */}
-          <Card className="bg-white/5 backdrop-blur-xl sm:col-span-2 text-white p-4 gap-2">
-            <CardHeader className="px-0">
-              <CardTitle className="text-base">Shift Distribution</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1 px-0">
-              {Object.entries(currentMonthAttendance.shiftDistribution).map(
-                ([shift, count]) => (
-                  <div key={shift} className="flex justify-between text-xs">
-                    <span>{shift}</span>
-                    <span>{count}</span>
-                  </div>
-                ),
-              )}
-            </CardContent>
-          </Card>
+          <AbsentModal
+            openAbsentModal={openAbsentModal}
+            setOpenAbsentModal={setOpenAbsentModal}
+            selectedDay={selectedDay as number}
+          />
+
+          <PresentModal
+            openPresentModal={openPresentModal}
+            setOpenPresentModal={setOpenPresentModal}
+            selectedDay={selectedDay as number}
+          />
         </div>
+
+        <MoodDistribution />
       </div>
     </div>
   );
