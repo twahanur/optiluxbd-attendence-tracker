@@ -4,11 +4,12 @@ import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";
 
 // Settings Service API
 export interface Setting {
-  id: number;
+  id: string;
   key: string;
-  value: string;
+  value: any;
   category: string;
   description?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -16,12 +17,8 @@ export interface Setting {
 export interface SettingsResponse {
   success: boolean;
   message: string;
-  data: {
-    settings: Setting[];
-    total: number;
-    categories: string[];
-  };
-  timestamp: string;
+  data: Setting[];
+  count: number;
 }
 
 export interface CategorySettingsResponse {

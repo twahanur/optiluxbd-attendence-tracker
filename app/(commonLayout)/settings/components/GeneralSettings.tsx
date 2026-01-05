@@ -37,9 +37,15 @@ export default function GeneralSettings() {
     try {
       setLoading(true);
       const response = await settingsApi.getAll();
-      if(response.data?.data?.settings) {
-        setSettings(response.data.data.settings);
-        setCategories(response.data.data.categories);
+      console.log('[GeneralSettings] Settings response:', response);
+      
+      if(response.success && response.data) {
+        console.log('[GeneralSettings] Setting settings data:', response.data);
+        setSettings(response.data);
+        
+        // Extract unique categories from settings
+        const uniqueCategories = Array.from(new Set(response.data.map(s => s.category)));
+        setCategories(uniqueCategories);
       }
     } catch (error) {
       toast.error('Failed to load settings');

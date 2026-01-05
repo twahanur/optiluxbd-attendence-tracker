@@ -50,12 +50,12 @@ export default function EmailSettings() {
   });
 
   // Email Templates State
-  const [templates, setTemplates] = useState<Partial<EmailTemplates>>({});
-  const [selectedTemplate, setSelectedTemplate] = useState<keyof EmailTemplates>('attendanceReminder');
+  const [templates, setTemplates] = useState<Record<string, EmailTemplate>>({});
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('attendance_reminder');
   const [currentTemplate, setCurrentTemplate] = useState<EmailTemplate>({
     subject: '',
-    html: '',
-    text: '',
+    htmlBody: '',
+    textBody: '',
     variables: [],
   });
 
@@ -78,21 +78,37 @@ export default function EmailSettings() {
         emailSettingsApi.getAllTemplates(),
       ]);
 
-      if (smtpRes.data?.smtp) {
-        setSMTPConfig(smtpRes.data.smtp);
+      console.log('[EmailSettings] SMTP response:', smtpRes);
+      
+      if (smtpRes.success && smtpRes.data) {
+        console.log('[EmailSettings] Setting SMTP data:', smtpRes.data);
+        setSMTPConfig({
+          host: smtpRes.data.host,
+          port: smtpRes.data.port,
+          secure: smtpRes.data.secure,
+          user: smtpRes.data.user,
+          pass: smtpRes.data.pass,
+          from: smtpRes.data.fromEmail || smtpRes.data.from || '',
+          isConfigured: true,
+        });
       }
       
-      if (templatesRes.data?.templates) {
-        setTemplates(templatesRes.data.templates);
+      console.log('[EmailSettings] Templates response:', templatesRes);
+      
+      if (templatesRes.success && templatesRes.data) {
+        console.log('[EmailSettings] Setting templates data:', templatesRes.data);
+        const templatesData = templatesRes.data as Record<string, EmailTemplate>;
+        setTemplates(templatesData);
         
         // Load first available template
-        const firstTemplate = Object.keys(templatesRes.data.templates)[0] as keyof EmailTemplates;
-        if (firstTemplate) {
-          setSelectedTemplate(firstTemplate);
-          setCurrentTemplate(templatesRes.data.templates[firstTemplate] || {
+        const templateKeys = Object.keys(templatesData);
+        if (templateKeys.length > 0) {
+          const firstTemplateKey = templateKeys[0];
+          setSelectedTemplate(firstTemplateKey as any);
+          setCurrentTemplate(templatesData[firstTemplateKey] || {
             subject: '',
-            html: '',
-            text: '',
+            htmlBody: '',
+            textBody: '',
             variables: [],
           });
         }
@@ -170,7 +186,7 @@ export default function EmailSettings() {
     }
   };
 
-  const handleTemplateChange = (templateName: keyof EmailTemplates) => {
+  const handleTemplateChange = (templateName: string) => {
     setSelectedTemplate(templateName);
     const template = templates[templateName];
     if (template) {
@@ -351,10 +367,10 @@ export default function EmailSettings() {
                   key={templateName}
                   variant={selectedTemplate === templateName ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => handleTemplateChange(templateName as keyof EmailTemplates)}
+                  onClick={() => handleTemplateChange(templateName)}
                   className="capitalize"
                 >
-                  {templateName.replace(/([A-Z])/g, ' $1').trim()}
+                  {templateName.replace(/_/g, ' ')}
                 </Button>
               ))}
             </div>
@@ -375,8 +391,8 @@ export default function EmailSettings() {
                 <Label htmlFor="templateHtml">HTML Template</Label>
                 <Textarea
                   id="templateHtml"
-                  value={currentTemplate.html}
-                  onChange={(e) => setCurrentTemplate({ ...currentTemplate, html: e.target.value })}
+                  value={currentTemplate.htmlBody}
+                  onChange={(e) => setCurrentTemplate({ ...currentTemplate, htmlBody: e.target.value })}
                   placeholder="HTML email template with variables like {{employeeName}}"
                   rows={8}
                   className="font-mono text-sm"
@@ -387,8 +403,8 @@ export default function EmailSettings() {
                 <Label htmlFor="templateText">Plain Text Version</Label>
                 <Textarea
                   id="templateText"
-                  value={currentTemplate.text}
-                  onChange={(e) => setCurrentTemplate({ ...currentTemplate, text: e.target.value })}
+                  value={currentTemplate.textBody}
+                  onChange={(e) => setCurrentTemplate({ ...currentTemplate, textBody: e.target.value })}
                   placeholder="Plain text version of the email"
                   rows={4}
                 />

@@ -46,7 +46,7 @@ export interface WorkingDayCheck {
 
 // Company Profile
 export const getCompanyProfile = async () => {
-  return apiGet<{ profile: CompanyProfile }>(
+  return apiGet<CompanyProfile>(
     "/settings/company/profile",
     {},
     "Failed to fetch company profile"

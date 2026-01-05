@@ -1,0 +1,100 @@
+{
+  "description": "Attendance Chart Data Pattern",
+  "dataType": "AttendanceChartData[]",
+  "structure": {
+    "date": "string (ISO format: YYYY-MM-DD)",
+    "present": "number (count of present employees)",
+    "absent": "number (count of absent employees)",
+    "late": "number (count of late employees)",
+    "total": "number (total employees for that day)"
+  },
+  "exampleData": [
+    {
+      "date": "2026-01-01",
+      "present": 32,
+      "absent": 2,
+      "late": 1,
+      "total": 35
+    },
+    {
+      "date": "2026-01-02",
+      "present": 30,
+      "absent": 3,
+      "late": 2,
+      "total": 35
+    },
+    {
+      "date": "2026-01-03",
+      "present": 33,
+      "absent": 1,
+      "late": 1,
+      "total": 35
+    },
+    {
+      "date": "2026-01-04",
+      "present": 28,
+      "absent": 5,
+      "late": 2,
+      "total": 35
+    },
+    {
+      "date": "2026-01-05",
+      "present": 31,
+      "absent": 2,
+      "late": 2,
+      "total": 35
+    }
+  ],
+  "backendApiResponse": {
+    "description": "Expected API response format for GET /api/v1/attendance/chart",
+    "endpoint": "GET /api/v1/attendance/chart?days=90",
+    "response": {
+      "success": true,
+      "message": "Attendance chart data retrieved successfully",
+      "data": {
+        "chartData": [
+          {
+            "date": "2025-10-03",
+            "present": 28,
+            "absent": 5,
+            "late": 2,
+            "total": 35
+          },
+          {
+            "date": "2025-10-04",
+            "present": 30,
+            "absent": 3,
+            "late": 2,
+            "total": 35
+          },
+          {
+            "date": "2025-12-31",
+            "present": 31,
+            "absent": 2,
+            "late": 2,
+            "total": 35
+          },
+          {
+            "date": "2026-01-01",
+            "present": 0,
+            "absent": 35,
+            "late": 0,
+            "total": 35
+          }
+        ]
+      },
+      "timestamp": "2026-01-01T10:00:00.000Z"
+    }
+  },
+  "notes": [
+    "The date should be in YYYY-MM-DD format",
+    "present + absent + late should equal total",
+    "Data should be sorted by date in ascending order",
+    "Provide at least 7 days for meaningful visualization",
+    "90 days recommended for 3-month view"
+  ],
+  "howToGenerate": {
+    "description": "SQL query example to generate this data from your attendance records",
+    "query": "SELECT \n  DATE(createdAt) as date,\n  COUNT(CASE WHEN status = 'present' THEN 1 END) as present,\n  COUNT(CASE WHEN status = 'absent' THEN 1 END) as absent,\n  COUNT(CASE WHEN status = 'late' THEN 1 END) as late,\n  (SELECT COUNT(DISTINCT id) FROM users WHERE isActive = true AND role = 'EMPLOYEE') as total\nFROM attendance\nWHERE createdAt >= DATE_SUB(NOW(), INTERVAL 90 DAY)\nGROUP BY DATE(createdAt)\nORDER BY date ASC"
+  }
+}
