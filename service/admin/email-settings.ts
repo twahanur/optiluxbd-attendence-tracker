@@ -9,14 +9,16 @@ export interface SMTPConfig {
   secure: boolean;
   user: string;
   pass: string;
-  from: string;
+  from?: string;
+  fromEmail?: string;
+  fromName?: string;
   isConfigured?: boolean;
 }
 
 export interface EmailTemplate {
   subject: string;
-  html: string;
-  text: string;
+  htmlBody: string;
+  textBody: string;
   variables?: string[];
 }
 
@@ -50,7 +52,7 @@ export interface TestEmailRequest {
 
 // SMTP Configuration
 export const getSMTPConfig = async () => {
-  return apiGet<{ smtp: SMTPConfig }>(
+  return apiGet<SMTPConfig>(
     "/settings/email/smtp",
     {},
     "Failed to fetch SMTP config"
@@ -76,15 +78,15 @@ export const testSMTPConnection = async () => {
 
 // Email Templates
 export const getAllTemplates = async () => {
-  return apiGet<any>(
-    "/settings/email/templates", 
-    {}, 
+  return apiGet<Record<string, EmailTemplate>>(
+    "/settings/email/templates",
+    {},
     "Failed to fetch email templates"
   );
 };
 
-export const getTemplate = async (templateName: keyof EmailTemplates) => {
-  return apiGet<{ template: EmailTemplate }>(
+export const getTemplate = async (templateName: string) => {
+  return apiGet<EmailTemplate>(
     `/settings/email/templates/${templateName}`,
     {},
     `Failed to fetch ${templateName} template`
@@ -92,7 +94,7 @@ export const getTemplate = async (templateName: keyof EmailTemplates) => {
 };
 
 export const updateTemplate = async (
-  templateName: keyof EmailTemplates,
+  templateName: string,
   template: EmailTemplate
 ) => {
   return apiPut(
@@ -114,7 +116,7 @@ export const getEmailSystemStatus = async () => {
 
 // Test Email
 export const sendTestEmail = async (testData: TestEmailRequest) => {
-  return apiPost("/test-email", testData, {}, "Failed to send test email");
+  return apiPost("/admin/test-email", testData, {}, "Failed to send test email");
 };
 
 export const emailSettingsApi = {

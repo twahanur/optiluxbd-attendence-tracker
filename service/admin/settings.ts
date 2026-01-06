@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";

@@ -43,10 +43,14 @@ export default function CompanySettingsManager() {
           getHolidays(),
         ]);
 
+        console.log("[CompanySettingsManager] Profile response:", profileRes);
+
         if (profileRes.success && profileRes.data) {
-          setProfile(profileRes.data.profile);
-          setFormData(profileRes.data.profile);
+          console.log("[CompanySettingsManager] Setting profile data:", profileRes.data);
+          setProfile(profileRes.data);
+          setFormData(profileRes.data);
         } else {
+          console.error("[CompanySettingsManager] Profile fetch failed:", profileRes);
           setError(profileRes.message || "Failed to fetch company profile");
         }
 

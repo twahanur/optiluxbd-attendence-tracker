@@ -2,6 +2,9 @@
 
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/service-client";
 
+// Note: getAttendanceChartData is exported separately from ./getChartData
+// Import directly: import { getAttendanceChartData } from "@/service/attendence/getChartData"
+
 // Attendance Service API
 export interface AttendanceRecord {
   id: number;

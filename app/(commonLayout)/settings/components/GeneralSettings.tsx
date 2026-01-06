@@ -83,7 +83,7 @@ export default function GeneralSettings() {
 
     } catch (error) {
       toast.error('Failed to load settings');
-s    } finally {
+   } finally {
       setLoading(false);
     }
   };

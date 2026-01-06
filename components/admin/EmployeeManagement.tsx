@@ -50,19 +50,29 @@ export default function EmployeeManagement() {
   // State management
   const [employees, setEmployees] = useState<EmployeeResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<CreateEmployeeRequest>({
     email: "",
-    name: "",
+    firstName: "",
+    lastName: "",
+    username: "",
+    employeeId: "",
     department: "",
     section: "",
+    designation: "",
+    phoneNumber: "",
+    address: "",
+    dateOfJoining: "",
     password: "",
     role: "EMPLOYEE",
   });
@@ -76,10 +86,14 @@ export default function EmployeeManagement() {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await getAllEmployees();
-      if (response.success && response.data) {
+      // Request all employees with limit=999 to get all pages in one request
+      const response = await getAllEmployees(1, 99);
+      if (response.success && response.data) {  
         setEmployees(response.data.employees || []);
-        toast.success("Employees loaded successfully");
+        setTotalCount(response.data.totalCount || 0);
+        setTotalPages(response.data.pagination?.totalPages || 1);
+        setCurrentPage(response.data.pagination?.page || 1);
+        toast.success(`Loaded ${response.data.employees?.length || 0} employees`);
       } else {
         toast.error(response.message || "Failed to load employees");
       }
@@ -97,9 +111,16 @@ export default function EmployeeManagement() {
     setSelectedEmployee(null);
     setFormData({
       email: "",
-      name: "",
+      firstName: "",
+      lastName: "",
+      username: "",
+      employeeId: "",
       department: "",
       section: "",
+      designation: "",
+      phoneNumber: "",
+      address: "",
+      dateOfJoining: "",
       password: "",
       role: "EMPLOYEE",
     });
@@ -112,11 +133,18 @@ export default function EmployeeManagement() {
     setSelectedEmployee(employee);
     setFormData({
       email: employee.email,
-      name: employee.name,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      username: employee.username,
+      employeeId: employee.employeeId,
       department: employee.department,
       section: employee.section || "",
+      designation: employee.designation || "",
+      phoneNumber: employee.phoneNumber || "",
+      address: employee.address || "",
+      dateOfJoining: employee.dateOfJoining || "",
       password: "", // Password field empty for edit
-      role: employee.role as "ADMIN" | "EMPLOYEE" | "HR",
+      role: "EMPLOYEE",
     });
     setIsDialogOpen(true);
   };
@@ -132,8 +160,8 @@ export default function EmployeeManagement() {
 
   // Validate form
   const validateForm = (): boolean => {
-    if (!formData.email || !formData.name || !formData.department) {
-      toast.error("Email, name, and department are required");
+    if (!formData.email || !formData.firstName || !formData.lastName || !formData.username || !formData.employeeId || !formData.department) {
+      toast.error("Email, first/last name, username, employee ID, and department are required");
       return false;
     }
 
@@ -159,10 +187,17 @@ export default function EmployeeManagement() {
       if (isEditMode && selectedEmployee) {
         // Update employee
         const updateData: Partial<CreateEmployeeRequest> = {
-          name: formData.name,
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          username: formData.username,
+          employeeId: formData.employeeId,
           department: formData.department,
-          section: formData.section,
-          role: formData.role,
+          section: formData.section || undefined,
+          designation: formData.designation || null,
+          phoneNumber: formData.phoneNumber || null,
+          address: formData.address || null,
+          dateOfJoining: formData.dateOfJoining || null,
         };
 
         if (formData.password) {
@@ -186,7 +221,22 @@ export default function EmployeeManagement() {
         }
       } else {
         // Create employee
-        const response = await createEmployee(formData as CreateEmployeeRequest);
+        const createPayload = {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          username: formData.username,
+          employeeId: formData.employeeId,
+          department: formData.department,
+          section: formData.section || undefined,
+          designation: formData.designation || null,
+          phoneNumber: formData.phoneNumber || null,
+          address: formData.address || null,
+          dateOfJoining: formData.dateOfJoining || null,
+          password: formData.password,
+        };
+
+        const response = await createEmployee(createPayload);
 
         if (response.success && response.data && 'employee' in response.data) {
           setEmployees((prev) => [...prev, (response.data as { employee: EmployeeResponse }).employee]);
@@ -205,7 +255,7 @@ export default function EmployeeManagement() {
   };
 
   // Delete employee
-  const handleDeleteEmployee = async (id: number) => {
+  const handleDeleteEmployee = async (id: string) => {
     setIsSubmitting(true);
     try {
       const response = await deleteEmployee(id);
@@ -226,11 +276,15 @@ export default function EmployeeManagement() {
   };
 
   // Filter employees based on search
-  const filteredEmployees = employees.filter((emp) =>
-    (emp.name?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-    (emp.email?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-    (emp.department?.toLowerCase() || "").includes(searchQuery.toLowerCase())
-  );
+  const filteredEmployees = employees.filter((emp) => {
+    const fullName = `${emp.firstName ?? ""} ${emp.lastName ?? ""}`.toLowerCase();
+    return (
+      fullName.includes(searchQuery.toLowerCase()) ||
+      (emp.email?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (emp.department?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (emp.employeeId?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+    );
+  });
 
   if (loading) {
     return (
@@ -284,7 +338,7 @@ export default function EmployeeManagement() {
         <CardHeader>
           <CardTitle>All Employees</CardTitle>
           <CardDescription>
-            {filteredEmployees.length} of {employees.length} employees
+            Showing {filteredEmployees.length} of {totalCount} total employees
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -302,6 +356,7 @@ export default function EmployeeManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Employee ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Department</TableHead>
@@ -314,7 +369,8 @@ export default function EmployeeManagement() {
                 <TableBody>
                   {filteredEmployees.map((employee) => (
                     <TableRow key={employee.id}>
-                      <TableCell className="font-medium">{employee.name}</TableCell>
+                      <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                      <TableCell className="font-medium">{`${employee.firstName} ${employee.lastName}`}</TableCell>
                       <TableCell>{employee.email}</TableCell>
                       <TableCell>{employee.department}</TableCell>
                       <TableCell>{employee.section || "-"}</TableCell>
@@ -365,14 +421,64 @@ export default function EmployeeManagement() {
 
       {/* Create/Edit Sheet */}
       <Sheet open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent className="w-full sm:max-w-md max-h-screen overflow-y-auto pb-6">
           <SheetHeader>
             <SheetTitle>
               {isEditMode ? "Edit Employee" : "Create New Employee"}
             </SheetTitle>
           </SheetHeader>
 
-          <div className="space-y-4">
+            <div className="space-y-4">
+            {/* First Name */}
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                name="firstName"
+                placeholder="John"
+                value={formData.firstName}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Last Name */}
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                placeholder="Doe"
+                value={formData.lastName}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Username */}
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                name="username"
+                placeholder="jdoe"
+                value={formData.username}
+                onChange={handleInputChange}
+                disabled={isEditMode}
+              />
+            </div>
+
+            {/* Employee ID */}
+            <div className="space-y-2">
+              <Label htmlFor="employeeId">Employee ID</Label>
+              <Input
+                id="employeeId"
+                name="employeeId"
+                placeholder="EMP001"
+                value={formData.employeeId}
+                onChange={handleInputChange}
+                disabled={isEditMode}
+              />
+            </div>
+
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -385,19 +491,7 @@ export default function EmployeeManagement() {
                 onChange={handleInputChange}
                 disabled={isEditMode}
               />
-            </div>
-
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                name="name"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={handleInputChange}
-              />
-            </div>
+            </div>    
 
             {/* Department */}
             <div className="space-y-2">
@@ -423,20 +517,52 @@ export default function EmployeeManagement() {
               />
             </div>
 
-            {/* Role */}
+            {/* Designation */}
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
+              <Label htmlFor="designation">Designation (Optional)</Label>
+              <Input
+                id="designation"
+                name="designation"
+                placeholder="e.g., Software Engineer"
+                value={formData.designation || ""}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-              >
-                <option value="EMPLOYEE">Employee</option>
-                <option value="HR">HR Manager</option>
-                <option value="ADMIN">Admin</option>
-              </select>
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone (Optional)</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                placeholder="+1-555-123-4567"
+                value={formData.phoneNumber || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <Label htmlFor="address">Address (Optional)</Label>
+              <Input
+                id="address"
+                name="address"
+                placeholder="123 Main Street"
+                value={formData.address || ""}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Date of Joining */}
+            <div className="space-y-2">
+              <Label htmlFor="dateOfJoining">Date of Joining (Optional)</Label>
+              <Input
+                id="dateOfJoining"
+                name="dateOfJoining"
+                type="date"
+                value={formData.dateOfJoining || ""}
+                onChange={handleInputChange}
+              />
             </div>
 
             {/* Password */}
@@ -456,6 +582,7 @@ export default function EmployeeManagement() {
                 onChange={handleInputChange}
               />
             </div>
+
           </div>
 
           <SheetFooter>
@@ -478,7 +605,7 @@ export default function EmployeeManagement() {
 
       {/* Delete Confirmation Sheet */}
       <Sheet open={deleteConfirmId !== null}>
-        <SheetContent className="w-full sm:max-w-sm">
+        <SheetContent className="w-full sm:max-w-sm max-h-screen overflow-y-auto pb-6">
           <SheetHeader>
             <SheetTitle>Delete Employee</SheetTitle>
           </SheetHeader>

@@ -63,22 +63,39 @@ export interface PasswordValidationResult {
 
 export interface CreateEmployeeRequest {
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  employeeId: string;
   department: string;
   section?: string;
+  designation?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  dateOfJoining?: string | null;
+  isActive?: boolean;
   password: string;
   role: "ADMIN" | "EMPLOYEE" | "HR";
 }
 
 export interface EmployeeResponse {
-  id: number;
+  id: string;
   email: string;
-  name: string;
+  username: string;
   role: string;
+  firstName: string;
+  lastName: string;
+  employeeId: string;
+  section: string | null;
   department: string;
-  section?: string;
+  designation: string | null;
+  phoneNumber: string | null;
+  address: string | null;
+  dateOfJoining: string | null;
   isActive: boolean;
   createdAt: string;
+  updatedAt: string;
+  createdBy: string | null;
 }
 
 // Password Policy
@@ -150,13 +167,24 @@ export const createEmployee = async (data: CreateEmployeeRequest) => {
     employee: EmployeeResponse;
     temporaryPassword: string;
     resetRequired: boolean;
-  }>("/admin/employees", data, {}, "Failed to create employee");
+  }>("/auth/employees", data, {}, "Failed to create employee");
 };
 
+export interface EmployeePaginationResponse {
+  employees: EmployeeResponse[];
+  totalCount: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 // Get all employees
-export const getAllEmployees = async () => {
-  return apiGet<{ employees: EmployeeResponse[]; total: number }>(
-    "/users/employees",
+export const getAllEmployees = async (page: number = 1, limit: number = 100) => {
+  return apiGet<EmployeePaginationResponse>(
+    `/users/employees?page=${page}&limit=${limit}`,
     {},
     "Failed to fetch employees"
   );
@@ -164,7 +192,7 @@ export const getAllEmployees = async () => {
 
 // Update employee
 export const updateEmployee = async (
-  id: number,
+  id: string,
   data: Partial<CreateEmployeeRequest>
 ) => {
   return apiPut(
@@ -176,7 +204,7 @@ export const updateEmployee = async (
 };
 
 // Delete employee
-export const deleteEmployee = async (id: number) => {
+export const deleteEmployee = async (id: string) => {
   return apiDelete(`/admin/employees/${id}`, {}, "Failed to delete employee");
 };
 
