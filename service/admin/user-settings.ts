@@ -208,6 +208,114 @@ export const deleteEmployee = async (id: string) => {
   return apiDelete(`/admin/employees/${id}`, {}, "Failed to delete employee");
 };
 
+// Session Settings
+export interface SessionSettings {
+  sessionTimeoutMinutes: number;
+  idleTimeoutMinutes: number;
+  maxConcurrentSessions: number;
+  enforceOneSessionPerDevice: boolean;
+  rememberMeDurationDays: number;
+  refreshTokenEnabled: boolean;
+  refreshTokenExpiryDays: number;
+  requireReauthForSensitiveActions: boolean;
+  logSessionActivity: boolean;
+  sessionCookieSecure: boolean;
+  sessionCookieHttpOnly: boolean;
+  sessionCookieSameSite: 'strict' | 'lax' | 'none';
+}
+
+export const getSessionSettings = async () => {
+  return apiGet<{ sessionSettings: SessionSettings }>(
+    "/admin/user-settings/session-settings",
+    {},
+    "Failed to fetch session settings"
+  );
+};
+
+export const updateSessionSettings = async (settings: Partial<SessionSettings>) => {
+  return apiPut(
+    "/admin/user-settings/session-settings",
+    settings,
+    {},
+    "Failed to update session settings"
+  );
+};
+
+// Profile Fields
+export interface ProfileField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  visible: boolean;
+  editable: boolean;
+}
+
+export interface ProfileFieldsConfig {
+  fields: ProfileField[];
+  allowCustomFields: boolean;
+  maxCustomFields: number;
+}
+
+export const getProfileFields = async () => {
+  return apiGet<{ profileFields: ProfileFieldsConfig }>(
+    "/admin/user-settings/profile-fields",
+    {},
+    "Failed to fetch profile fields configuration"
+  );
+};
+
+export const updateProfileFields = async (config: Partial<ProfileFieldsConfig>) => {
+  return apiPut(
+    "/admin/user-settings/profile-fields",
+    config,
+    {},
+    "Failed to update profile fields configuration"
+  );
+};
+
+// Password Requirements (for display)
+export interface PasswordRequirement {
+  key: string;
+  label: string;
+  met: boolean;
+}
+
+export const getPasswordRequirements = async () => {
+  return apiGet<{ requirements: PasswordRequirement[]; policy: PasswordPolicy }>(
+    "/admin/user-settings/password-requirements",
+    {},
+    "Failed to fetch password requirements"
+  );
+};
+
+// Get all user settings at once
+export interface AllUserSettings {
+  passwordPolicy: PasswordPolicy;
+  registrationPolicy: RegistrationPolicy;
+  lockoutRules: LockoutRules;
+  sessionSettings: SessionSettings;
+  profileFields: ProfileFieldsConfig;
+}
+
+export const getAllUserSettings = async () => {
+  return apiGet<AllUserSettings>(
+    "/admin/user-settings/all",
+    {},
+    "Failed to fetch all user settings"
+  );
+};
+
+// Reset all user settings to defaults
+export const resetUserSettingsToDefaults = async () => {
+  return apiPost(
+    "/admin/user-settings/reset-defaults",
+    {},
+    {},
+    "Failed to reset user settings to defaults"
+  );
+};
+
 export const userSettingsApi = {
   getPasswordPolicy,
   updatePasswordPolicy,
@@ -216,6 +324,13 @@ export const userSettingsApi = {
   updateRegistrationPolicy,
   getLockoutRules,
   updateLockoutRules,
+  getSessionSettings,
+  updateSessionSettings,
+  getProfileFields,
+  updateProfileFields,
+  getPasswordRequirements,
+  getAllUserSettings,
+  resetUserSettingsToDefaults,
   createEmployee,
   getAllEmployees,
   updateEmployee,

@@ -60,6 +60,17 @@ export {
   securitySettingsApi,
 } from "./security-settings";
 
+export {
+  getScheduleStatus,
+  startSchedules,
+  stopSchedules,
+  reloadSchedules,
+  getScheduleSettings,
+  updateScheduleSettings,
+  toggleSchedule,
+  scheduleSettingsApi,
+} from "./schedule-settings";
+
 // Re-export server actions
 export { GetStatistics } from "./statistics";
 
@@ -104,3 +115,11 @@ export type {
   SecuritySettingsBundle,
   RateLimitUpdateRequest,
 } from "./security-settings";
+
+export type {
+  ScheduleItem,
+  ScheduleStatus,
+  ScheduleSettings,
+  ScheduleActionResult,
+  ToggleResult,
+} from "./schedule-settings";
