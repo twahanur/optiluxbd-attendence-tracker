@@ -19,7 +19,7 @@ export default function GeneralSettings() {
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | number | null>(null);
   const [newSetting, setNewSetting] = useState<CreateSettingRequest>({
     key: '',
     value: '',
@@ -36,16 +36,70 @@ export default function GeneralSettings() {
   const loadSettings = async () => {
     try {
       setLoading(true);
+      console.log('Starting to load settings...');
+      
       const response = await settingsApi.getAll();
-      if(response.data?.data?.settings) {
-        setSettings(response.data.data.settings);
-        setCategories(response.data.data.categories);
+      console.log('Full API Response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response.data:', response?.data);
+      console.log('Response.data type:', typeof response?.data);
+      console.log('Is response.data an array?', Array.isArray(response?.data));
+      
+      if (!response) {
+        toast.error('No response from server');
+        console.error('No response received');
+        return;
       }
+      
+      if (!response.success) {
+        toast.error(response.message || 'Failed to load settings');
+        console.error('API returned error:', response);
+        return;
+      }
+      
+      // Handle various response structures from different API versions
+      let settingsData: Setting[] = [];
+      
+      // Structure 1: Backend returns { success, data: [...settings array...], count }
+      if (response.data && Array.isArray(response.data)) {
+        console.log('Detected array data structure');
+        settingsData = response.data;
+      } 
+      // Structure 2: Mock API returns { success, data: { settings: [...], categories: [...] } }
+      else if (response.data && typeof response.data === 'object' && 'settings' in response.data && Array.isArray((response.data as { settings: Setting[] }).settings)) {
+        console.log('Detected nested settings structure');
+        settingsData = (response.data as { settings: Setting[] }).settings;
+      }
+      // Structure 3: Response is directly an array (unlikely but handle it)
+      else if (Array.isArray(response)) {
+        console.log('Detected direct array response');
+        settingsData = response as unknown as Setting[];
+      }
+      else {
+        console.error('Unknown response structure:', response);
+        console.error('response.data keys:', response.data ? Object.keys(response.data) : 'no data');
+        toast.error('Unexpected data format from server');
+        return;
+      }
+      
+      console.log('Settings data extracted:', settingsData.length, 'items');
+      
+      // Extract unique categories from settings
+      const uniqueCategories = [...new Set(settingsData.map(s => s.category))].sort();
+      
+      console.log('Setting state with', settingsData.length, 'settings and', uniqueCategories.length, 'categories');
+      
+      setSettings(settingsData);
+      setCategories(uniqueCategories);
+      
+      console.log('State updated successfully');
+
     } catch (error) {
       toast.error('Failed to load settings');
-      console.error(error);
+      console.error('Settings load error:', error);
     } finally {
       setLoading(false);
+      console.log('Loading complete');
     }
   };
 
@@ -111,6 +165,39 @@ export default function GeneralSettings() {
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin" />
         <span className="ml-2">Loading settings...</span>
+      </div>
+    );
+  }
+
+  // Empty state when no settings are found
+  if (settings.length === 0) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium">System Settings</h3>
+            <p className="text-sm text-muted-foreground">
+              Manage all system-wide configuration settings
+            </p>
+          </div>
+          <Button 
+            onClick={() => setShowNewForm(!showNewForm)}
+            className="flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Setting</span>
+          </Button>
+        </div>
+
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-muted-foreground mb-4">No settings found</p>
+            <Button onClick={loadSettings} variant="outline">
+              Retry Loading
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -297,11 +384,22 @@ interface SettingRowProps {
 }
 
 function SettingRow({ setting, isEditing, onEdit, onCancel, onSave, onDelete, saving }: SettingRowProps) {
-  const [editValue, setEditValue] = useState(setting.value);
+  const [editValue, setEditValue] = useState(String(setting.value));
+
+  // Format value for display
+  const formatValue = (value: any): string => {
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+    if (typeof value === 'object' && value !== null) {
+      return JSON.stringify(value);
+    }
+    return String(value);
+  };
 
   // Reset edit value when editing starts
   const handleEdit = () => {
-    setEditValue(setting.value);
+    setEditValue(formatValue(setting.value));
     onEdit();
   };
 
@@ -321,7 +419,7 @@ function SettingRow({ setting, isEditing, onEdit, onCancel, onSave, onDelete, sa
             disabled={saving}
           />
         ) : (
-          <span className="break-all">{setting.value}</span>
+          <span className="break-all">{formatValue(setting.value)}</span>
         )}
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">

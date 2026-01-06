@@ -10,6 +10,7 @@ import {
   Mail, 
   Users, 
   Shield, 
+  ShieldCheck,
   TestTube
 } from 'lucide-react';
 
@@ -19,6 +20,7 @@ import CompanySettings from './components/CompanySettings';
 import EmailSettings from './components/EmailSettings';
 import UserSettings from './components/UserSettings';
 import SystemHealth from './components/SystemHealth';
+import SecuritySettings from './components/SecuritySettings';
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
@@ -53,6 +55,13 @@ export default function AdminSettingsPage() {
       component: UserSettings
     },
     {
+      id: 'security',
+      label: 'Security',
+      icon: ShieldCheck,
+      description: 'Dynamic password, username, and rate limit rules',
+      component: SecuritySettings
+    },
+    {
       id: 'system',
       label: 'System Health',
       icon: TestTube,
@@ -79,7 +88,7 @@ export default function AdminSettingsPage() {
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-5 border border-white/20 bg-white/5 text-white/90 backdrop-blur-sm">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border border-white/20 bg-white/5 text-white/90 backdrop-blur-sm">
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             return (

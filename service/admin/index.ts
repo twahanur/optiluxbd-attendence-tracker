@@ -49,6 +49,17 @@ export {
   userSettingsApi,
 } from "./user-settings";
 
+export {
+  getAllSecuritySettings,
+  getPasswordRules,
+  updatePasswordRules,
+  getUsernameRules,
+  updateUsernameRules,
+  getRateLimitConfig,
+  updateRateLimitConfig,
+  securitySettingsApi,
+} from "./security-settings";
+
 // Re-export server actions
 export { GetStatistics } from "./statistics";
 
@@ -85,3 +96,11 @@ export type {
   CreateEmployeeRequest,
   EmployeeResponse,
 } from "./user-settings";
+
+export type {
+  PasswordRules,
+  UsernameRules,
+  RateLimitConfig,
+  SecuritySettingsBundle,
+  RateLimitUpdateRequest,
+} from "./security-settings";
