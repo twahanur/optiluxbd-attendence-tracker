@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,10 +16,14 @@ import {
   type EmailSystemStatus,
 } from "@/service/admin/email-settings";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  SMTPConfigurationTab,
+  EmailTemplatesTab,
+  EmailSystemStatusTab,
+  SendTestEmailTab,
+} from "./email-settings";
 
 export default function EmailSettingsManager() {
   const [smtpConfig, setSMTPConfig] = useState<SMTPConfig | null>(null);
@@ -37,12 +42,16 @@ export default function EmailSettingsManager() {
       try {
         setLoading(true);
         setError(null);
-
+        
+        console.log("📧 Fetching email settings...");
+        
         const [smtpRes, templatesRes, statusRes] = await Promise.all([
           getSMTPConfig(),
           getAllTemplates(),
           getEmailSystemStatus(),
         ]);
+        
+        console.log("📊 API Responses:", { smtpRes, templatesRes, statusRes });
 
         if (smtpRes.success && smtpRes.data) {
           setSMTPConfig(smtpRes.data.smtp);
@@ -50,8 +59,27 @@ export default function EmailSettingsManager() {
           setError(smtpRes.message || "Failed to fetch SMTP config");
         }
 
+        console.log("📧 Templates Response:", templatesRes);
+        
         if (templatesRes.success && templatesRes.data) {
-          setTemplates(templatesRes.data.templates);
+          console.log("📧 Raw templates data:", templatesRes.data);
+          // Map API response to component format
+          const mappedTemplates: Record<string, EmailTemplate> = {};
+          Object.entries(templatesRes.data).forEach(([key, value]: [string, any]) => {
+            if (key !== 'count' && key !== 'message' && key !== 'success' && value && typeof value === 'object') {
+              // Convert snake_case to camelCase
+              const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+              console.log(`🔄 Mapping ${key} → ${camelKey}`, value);
+              mappedTemplates[camelKey] = {
+                subject: value.subject || '',
+                html: value.htmlBody || value.html || '',
+                text: value.textBody || value.text || '',
+                variables: value.variables || []
+              };
+            }
+          });
+          console.log("✅ Mapped templates:", mappedTemplates);
+          setTemplates(mappedTemplates);
         }
 
         if (statusRes.success && statusRes.data) {
@@ -66,6 +94,8 @@ export default function EmailSettingsManager() {
 
     fetchData();
   }, []);
+
+  console.log("afeter uise effect")
 
   // Handle SMTP update
   const handleSMTPUpdate = async () => {
@@ -124,7 +154,18 @@ export default function EmailSettingsManager() {
         return;
       }
 
-      const response = await updateTemplate(templateName as keyof EmailTemplates, template);
+      // Convert camelCase to snake_case for API
+      const snakeCaseTemplateName = templateName.replace(/([A-Z])/g, '_$1').toLowerCase();
+      
+      // Map template format from component to API format
+      const apiTemplate = {
+        subject: template.subject,
+        htmlBody: template.html,
+        textBody: template.text,
+        variables: template.variables
+      };
+
+      const response = await updateTemplate(snakeCaseTemplateName as keyof EmailTemplates, apiTemplate as any);
 
       if (response.success) {
         setEditingTemplate(null);
@@ -196,341 +237,30 @@ export default function EmailSettingsManager() {
           <TabsTrigger value="test">Send Test Email</TabsTrigger>
         </TabsList>
 
-        {/* SMTP Configuration Tab */}
-        <TabsContent value="smtp">
-          <Card>
-            <CardHeader>
-              <CardTitle>SMTP Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {smtpConfig && (
-                <div className="space-y-4">
-                  {!editingSMTP ? (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-500">Host</p>
-                          <p className="text-lg font-semibold">{smtpConfig.host}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Port</p>
-                          <p className="text-lg font-semibold">{smtpConfig.port}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">User</p>
-                          <p className="text-lg font-semibold">{smtpConfig.user}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">From Address</p>
-                          <p className="text-lg font-semibold">{smtpConfig.from}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Secure</p>
-                        <span
-                          className={`inline-block px-3 py-1 rounded text-sm font-semibold ${
-                            smtpConfig.secure ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {smtpConfig.secure ? "Yes (TLS)" : "No"}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={() => setEditingSMTP(true)}>Edit SMTP Config</Button>
-                        <Button variant="outline" onClick={handleTestSMTP}>
-                          Test Connection
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-semibold mb-2">Host</label>
-                          <Input
-                            value={smtpConfig.host}
-                            onChange={(e) => setSMTPConfig({ ...smtpConfig, host: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2">Port</label>
-                          <Input
-                            type="number"
-                            value={smtpConfig.port}
-                            onChange={(e) => setSMTPConfig({ ...smtpConfig, port: parseInt(e.target.value) })}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2">User</label>
-                          <Input
-                            value={smtpConfig.user}
-                            onChange={(e) => setSMTPConfig({ ...smtpConfig, user: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2">Password</label>
-                          <Input
-                            type="password"
-                            placeholder="Enter password"
-                            onChange={(e) => setSMTPConfig({ ...smtpConfig, pass: e.target.value })}
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="block text-sm font-semibold mb-2">From Address</label>
-                          <Input
-                            value={smtpConfig.from}
-                            onChange={(e) => setSMTPConfig({ ...smtpConfig, from: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-2">Secure (TLS)</label>
-                          <select
-                            value={smtpConfig.secure ? "true" : "false"}
-                            onChange={(e) => setSMTPConfig({ ...smtpConfig, secure: e.target.value === "true" })}
-                            className="w-full border rounded px-3 py-2"
-                          >
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={handleSMTPUpdate}>Save Changes</Button>
-                        <Button variant="outline" onClick={() => setEditingSMTP(false)}>
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <SMTPConfigurationTab
+          smtpConfig={smtpConfig}
+          editingSMTP={editingSMTP}
+          setEditingSMTP={setEditingSMTP}
+          setSMTPConfig={setSMTPConfig}
+          onTestConnection={handleTestSMTP}
+          onSaveChanges={handleSMTPUpdate}
+        />
 
-        {/* Email Templates Tab */}
-        <TabsContent value="templates">
-          <div className="space-y-4">
-            {Object.entries(templates).map(([templateName, template]) => (
-              <Card key={templateName}>
-                <CardHeader>
-                  <CardTitle className="capitalize">{templateName.replace(/([A-Z])/g, " $1")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {editingTemplate === templateName ? (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">Subject</label>
-                        <Input
-                          value={template.subject}
-                          onChange={(e) =>
-                            setTemplates({
-                              ...templates,
-                              [templateName]: { ...template, subject: e.target.value },
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">HTML Content</label>
-                        <textarea
-                          value={template.html}
-                          onChange={(e) =>
-                            setTemplates({
-                              ...templates,
-                              [templateName]: { ...template, html: e.target.value },
-                            })
-                          }
-                          className="w-full border rounded px-3 py-2 min-h-48 font-mono text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">Text Content</label>
-                        <textarea
-                          value={template.text}
-                          onChange={(e) =>
-                            setTemplates({
-                              ...templates,
-                              [templateName]: { ...template, text: e.target.value },
-                            })
-                          }
-                          className="w-full border rounded px-3 py-2 min-h-32 font-mono text-sm"
-                        />
-                      </div>
-                      {template.variables && template.variables.length > 0 && (
-                        <div>
-                          <label className="block text-sm font-semibold mb-2">Available Variables</label>
-                          <div className="flex flex-wrap gap-2">
-                            {template.variables.map((variable) => (
-                              <span key={variable} className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
-                                {`{{${variable}}}`}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <Button onClick={() => handleTemplateUpdate(templateName)}>Save Template</Button>
-                        <Button variant="outline" onClick={() => setEditingTemplate(null)}>
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Subject</p>
-                        <p className="text-lg font-semibold">{template.subject}</p>
-                      </div>
-                      {template.variables && template.variables.length > 0 && (
-                        <div>
-                          <p className="text-sm text-gray-500 mb-2">Available Variables</p>
-                          <div className="flex flex-wrap gap-2">
-                            {template.variables.map((variable) => (
-                              <span key={variable} className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
-                                {`{{${variable}}}`}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      <Button onClick={() => setEditingTemplate(templateName)}>Edit Template</Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+        <EmailTemplatesTab
+          templates={templates}
+          editingTemplate={editingTemplate}
+          setEditingTemplate={setEditingTemplate}
+          setTemplates={setTemplates}
+          onTemplateUpdate={handleTemplateUpdate}
+        />
 
-        {/* Email System Status Tab */}
-        <TabsContent value="status">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email System Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {emailStatus && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="border rounded p-4">
-                      <p className="text-sm text-gray-500 mb-2">System Status</p>
-                      <span
-                        className={`inline-block px-3 py-1 rounded text-sm font-semibold ${
-                          emailStatus.isConfigured
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {emailStatus.isConfigured ? "Configured" : "Not Configured"}
-                      </span>
-                    </div>
-                    <div className="border rounded p-4">
-                      <p className="text-sm text-gray-500 mb-2">SMTP Status</p>
-                      <span
-                        className={`inline-block px-3 py-1 rounded text-sm font-semibold ${
-                          emailStatus.smtpStatus === "connected"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {emailStatus.smtpStatus.charAt(0).toUpperCase() + emailStatus.smtpStatus.slice(1)}
-                      </span>
-                    </div>
-                    <div className="border rounded p-4">
-                      <p className="text-sm text-gray-500 mb-2">Emails Today</p>
-                      <p className="text-2xl font-bold">{emailStatus.emailsSentToday}</p>
-                    </div>
-                  </div>
+        <EmailSystemStatusTab emailStatus={emailStatus} />
 
-                  <div className="border rounded p-4">
-                    <p className="text-sm text-gray-500 mb-2">Failed Emails Today</p>
-                    <p className="text-2xl font-bold text-red-600">{emailStatus.failedEmailsToday}</p>
-                  </div>
-
-                  {emailStatus.lastTestTime && (
-                    <div className="border rounded p-4">
-                      <p className="text-sm text-gray-500 mb-2">Last Test Time</p>
-                      <p className="text-lg">{new Date(emailStatus.lastTestTime).toLocaleString()}</p>
-                    </div>
-                  )}
-
-                  <div>
-                    <h3 className="font-semibold mb-4">Active Jobs</h3>
-                    {emailStatus.activeJobs.length > 0 ? (
-                      <div className="space-y-3">
-                        {emailStatus.activeJobs.map((job) => (
-                          <div key={job.name} className="border rounded p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <p className="font-semibold">{job.name}</p>
-                              <span
-                                className={`px-2 py-1 rounded text-xs font-semibold ${
-                                  job.status === "active"
-                                    ? "bg-green-100 text-green-800"
-                                    : job.status === "paused"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600">Schedule: {job.schedule}</p>
-                            <p className="text-sm text-gray-600">
-                              Next Run: {new Date(job.nextRun).toLocaleString()}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">No active jobs</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Send Test Email Tab */}
-        <TabsContent value="test">
-          <Card>
-            <CardHeader>
-              <CardTitle>Send Test Email</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4 max-w-lg">
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Recipient Email</label>
-                  <Input
-                    type="email"
-                    placeholder="test@example.com"
-                    value={testEmail.email}
-                    onChange={(e) => setTestEmail({ ...testEmail, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Subject</label>
-                  <Input
-                    placeholder="Test Email Subject"
-                    value={testEmail.subject}
-                    onChange={(e) => setTestEmail({ ...testEmail, subject: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-2">Message</label>
-                  <textarea
-                    placeholder="Test email message"
-                    value={testEmail.message}
-                    onChange={(e) => setTestEmail({ ...testEmail, message: e.target.value })}
-                    className="w-full border rounded px-3 py-2 min-h-32"
-                  />
-                </div>
-                <Button onClick={handleSendTestEmail}>Send Test Email</Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <SendTestEmailTab
+          testEmail={testEmail}
+          setTestEmail={setTestEmail}
+          onSendTestEmail={handleSendTestEmail}
+        />
       </Tabs>
     </div>
   );

@@ -11,7 +11,7 @@ const CommonLayout = async ({
   const userInfo = await getCurrentUser();
 
   return (
-    <section className="px-10 py-4">
+    <section className=" py-4">
       <SidebarProvider
         style={
           {

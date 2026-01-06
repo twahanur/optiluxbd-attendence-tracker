@@ -76,10 +76,11 @@ export const testSMTPConnection = async () => {
 
 // Email Templates
 export const getAllTemplates = async () => {
-  return apiGet<{
-    templates: Partial<EmailTemplates>;
-    count: number;
-  }>("/settings/email/templates", {}, "Failed to fetch email templates");
+  return apiGet<any>(
+    "/settings/email/templates", 
+    {}, 
+    "Failed to fetch email templates"
+  );
 };
 
 export const getTemplate = async (templateName: keyof EmailTemplates) => {

@@ -44,7 +44,6 @@ Generated on: ${new Date().toLocaleString()}`;
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      console.log('PDF report generated successfully');
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
@@ -87,7 +86,6 @@ Generated on: ${new Date().toLocaleString()}`;
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      console.log('CSV exported successfully');
     } catch (error) {
       console.error('Error exporting CSV:', error);
     }
@@ -118,7 +116,6 @@ Generated on: ${new Date().toLocaleString()}`;
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      console.log('Excel report generated successfully');
     } catch (error) {
       console.error('Error generating Excel:', error);
     } finally {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -36,24 +37,18 @@ export default function GeneralSettings() {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      console.log('Starting to load settings...');
+
       
       const response = await settingsApi.getAll();
-      console.log('Full API Response:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response.data:', response?.data);
-      console.log('Response.data type:', typeof response?.data);
-      console.log('Is response.data an array?', Array.isArray(response?.data));
-      
+    
       if (!response) {
         toast.error('No response from server');
-        console.error('No response received');
+        
         return;
       }
       
       if (!response.success) {
         toast.error(response.message || 'Failed to load settings');
-        console.error('API returned error:', response);
         return;
       }
       
@@ -62,44 +57,34 @@ export default function GeneralSettings() {
       
       // Structure 1: Backend returns { success, data: [...settings array...], count }
       if (response.data && Array.isArray(response.data)) {
-        console.log('Detected array data structure');
         settingsData = response.data;
       } 
       // Structure 2: Mock API returns { success, data: { settings: [...], categories: [...] } }
       else if (response.data && typeof response.data === 'object' && 'settings' in response.data && Array.isArray((response.data as { settings: Setting[] }).settings)) {
-        console.log('Detected nested settings structure');
         settingsData = (response.data as { settings: Setting[] }).settings;
       }
       // Structure 3: Response is directly an array (unlikely but handle it)
       else if (Array.isArray(response)) {
-        console.log('Detected direct array response');
         settingsData = response as unknown as Setting[];
       }
       else {
-        console.error('Unknown response structure:', response);
-        console.error('response.data keys:', response.data ? Object.keys(response.data) : 'no data');
         toast.error('Unexpected data format from server');
         return;
       }
       
-      console.log('Settings data extracted:', settingsData.length, 'items');
       
       // Extract unique categories from settings
       const uniqueCategories = [...new Set(settingsData.map(s => s.category))].sort();
       
-      console.log('Setting state with', settingsData.length, 'settings and', uniqueCategories.length, 'categories');
       
       setSettings(settingsData);
       setCategories(uniqueCategories);
       
-      console.log('State updated successfully');
 
     } catch (error) {
       toast.error('Failed to load settings');
-      console.error('Settings load error:', error);
-    } finally {
+s    } finally {
       setLoading(false);
-      console.log('Loading complete');
     }
   };
 
