@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, Download, RefreshCw } from "lucide-react";
+import { CalendarIcon, Download, RefreshCw, FileText, Users, BarChart3, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   BarChart,
   Bar,
@@ -16,8 +17,20 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LineChart,
+  Line,
+  Legend,
 } from "recharts";
 import { useRouter } from "next/navigation";
+import {
+  GetDailyReport,
+  GetWeeklyReport,
+  GetMonthlyReport,
+  GetEmployeeReport,
+  GetAttendanceSummary,
+  GetDayWiseAttendance,
+} from "@/service/reports";
+import { getAllEmployees } from "@/service/admin";
 
 interface DepartmentReport {
   department: string;
@@ -373,27 +386,320 @@ export default function ReportsClient({
         </TabsContent>
 
         <TabsContent value="employee" className="mt-6">
-          <Card className="border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Employee Reports</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-200">Employee reports coming soon...</p>
-            </CardContent>
-          </Card>
+          <EmployeeReportTab />
         </TabsContent>
 
         <TabsContent value="analytics" className="mt-6">
-          <Card className="border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-200">Analytics dashboard coming soon...</p>
-            </CardContent>
-          </Card>
+          <AnalyticsTab />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// Employee Report Tab Component
+function EmployeeReportTab() {
+  const [employees, setEmployees] = useState<Array<{ id: string; firstName: string; lastName: string; employeeId: string }>>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split("T")[0];
+  });
+  const [endDate, setEndDate] = useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [reportData, setReportData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await getAllEmployees(1, 100);
+        if (response.success && response.data?.employees) {
+          setEmployees(response.data.employees);
+        }
+      } catch (err) {
+        console.error("Failed to fetch employees:", err);
+      } finally {
+        setLoadingEmployees(false);
+      }
+    };
+    fetchEmployees();
+  }, []);
+
+  const handleFetchReport = async () => {
+    if (!selectedEmployeeId) {
+      toast.error("Please select an employee");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await GetEmployeeReport(selectedEmployeeId, startDate, endDate);
+      if (response.success && response.data) {
+        setReportData(response.data);
+        toast.success("Employee report loaded");
+      } else {
+        toast.error(response.message || "Failed to fetch report");
+      }
+    } catch (err) {
+      toast.error("Failed to fetch employee report");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-white/20">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Employee Report
+          </CardTitle>
+          <CardDescription className="text-gray-300">
+            Generate attendance report for a specific employee
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label className="text-white">Select Employee</Label>
+              {loadingEmployees ? (
+                <div className="flex items-center gap-2 text-gray-400">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading...
+                </div>
+              ) : (
+                <Select value={selectedEmployeeId} onValueChange={setSelectedEmployeeId}>
+                  <SelectTrigger className="border-white/20 text-white">
+                    <SelectValue placeholder="Select employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.firstName} {emp.lastName} ({emp.employeeId})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white">Start Date</Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="border-white/20 text-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white">End Date</Label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="border-white/20 text-white"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                onClick={handleFetchReport}
+                disabled={loading || !selectedEmployeeId}
+                className="bg-purple-500 hover:bg-purple-600 w-full"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Generate Report
+              </Button>
+            </div>
+          </div>
+
+          {reportData && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-white">{reportData.statistics?.totalDays || 0}</div>
+                  <p className="text-sm text-gray-400">Total Days</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-500/10 border-green-500/20">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-green-400">{reportData.statistics?.presentDays || 0}</div>
+                  <p className="text-sm text-gray-400">Present Days</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-red-500/10 border-red-500/20">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-red-400">{reportData.statistics?.absentDays || 0}</div>
+                  <p className="text-sm text-gray-400">Absent Days</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-purple-500/10 border-purple-500/20">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-purple-400">{reportData.statistics?.attendanceRate || 0}%</div>
+                  <p className="text-sm text-gray-400">Attendance Rate</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Analytics Tab Component
+function AnalyticsTab() {
+  const [dailyData, setDailyData] = useState<any>(null);
+  const [weeklyData, setWeeklyData] = useState<any>(null);
+  const [monthlyData, setMonthlyData] = useState<any>(null);
+  const [summaryData, setSummaryData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        const [dailyRes, weeklyRes, monthlyRes, summaryRes] = await Promise.all([
+          GetDailyReport(),
+          GetWeeklyReport(),
+          GetMonthlyReport(),
+          GetAttendanceSummary(),
+        ]);
+
+        if (dailyRes.success) setDailyData(dailyRes.data);
+        if (weeklyRes.success) setWeeklyData(weeklyRes.data);
+        if (monthlyRes.success) setMonthlyData(monthlyRes.data);
+        if (summaryRes.success) setSummaryData(summaryRes.data);
+      } catch (err) {
+        console.error("Failed to fetch analytics:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card className="border-white/20">
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-white/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-400">Today&apos;s Attendance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">{dailyData?.presentCount || 0}/{dailyData?.totalEmployees || 0}</div>
+            <p className="text-xs text-gray-400">
+              {dailyData?.attendanceRate ? `${dailyData.attendanceRate}%` : "N/A"} attendance rate
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-white/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-400">This Week Average</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">{weeklyData?.averageAttendance || 0}%</div>
+            <p className="text-xs text-gray-400">Weekly average</p>
+          </CardContent>
+        </Card>
+        <Card className="border-white/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-400">This Month Average</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">{monthlyData?.averageAttendance || 0}%</div>
+            <p className="text-xs text-gray-400">{monthlyData?.totalWorkingDays || 0} working days</p>
+          </CardContent>
+        </Card>
+        <Card className="border-white/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-400">Late Arrivals Today</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-400">{dailyData?.lateCount || 0}</div>
+            <p className="text-xs text-gray-400">Employees arrived late</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Weekly Trend Chart */}
+      {weeklyData?.dailyBreakdown && weeklyData.dailyBreakdown.length > 0 && (
+        <Card className="border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Weekly Attendance Trend
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weeklyData.dailyBreakdown}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="date" stroke="#fff" fontSize={12} />
+                  <YAxis stroke="#fff" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      borderRadius: "8px",
+                      color: "#fff",
+                    }}
+                  />
+                  <Legend />
+                  <Line type="monotone" dataKey="present" stroke="#22c55e" strokeWidth={2} name="Present" />
+                  <Line type="monotone" dataKey="absent" stroke="#ef4444" strokeWidth={2} name="Absent" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Overall Summary */}
+      {summaryData && (
+        <Card className="border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white">Overall Attendance Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <p className="text-sm text-gray-400">Total Records</p>
+                <p className="text-xl font-bold text-white">{summaryData.overall?.totalRecords || 0}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Average Attendance</p>
+                <p className="text-xl font-bold text-white">{summaryData.overall?.averageAttendance || 0}%</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">This Month Trend</p>
+                <p className={`text-xl font-bold ${
+                  summaryData.thisMonth?.trend === "up" ? "text-green-400" :
+                  summaryData.thisMonth?.trend === "down" ? "text-red-400" : "text-yellow-400"
+                }`}>
+                  {summaryData.thisMonth?.trend === "up" ? "↑" : summaryData.thisMonth?.trend === "down" ? "↓" : "→"} 
+                  {summaryData.thisMonth?.attendanceRate || 0}%
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

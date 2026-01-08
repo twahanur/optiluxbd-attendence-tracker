@@ -78,12 +78,27 @@ export const updateSetting = async (key: string, value: string) => {
 
 // Bulk update settings
 export const bulkUpdateSettings = async (data: BulkUpdateRequest) => {
-  return apiPut("/settings/bulk", data, {}, "Failed to bulk update settings");
+  return apiPost("/settings/bulk", data, {}, "Failed to bulk update settings");
 };
 
 // Delete setting
 export const deleteSetting = async (key: string) => {
   return apiDelete(`/settings/${key}`, {}, "Failed to delete setting");
+};
+
+// Upsert setting (create or update)
+export const upsertSetting = async (key: string, data: { value: string; category?: string; description?: string }) => {
+  return apiPut(`/settings/${key}/upsert`, data, {}, "Failed to upsert setting");
+};
+
+// Initialize default settings
+export const initializeSettings = async () => {
+  return apiPost("/settings/initialize", {}, {}, "Failed to initialize settings");
+};
+
+// Initialize admin default settings
+export const initializeAdminSettings = async () => {
+  return apiPost("/admin/settings/initialize", {}, {}, "Failed to initialize admin settings");
 };
 
 export const settingsApi = {
@@ -93,4 +108,7 @@ export const settingsApi = {
   update: updateSetting,
   bulkUpdate: bulkUpdateSettings,
   delete: deleteSetting,
+  upsert: upsertSetting,
+  initialize: initializeSettings,
+  initializeAdmin: initializeAdminSettings,
 };

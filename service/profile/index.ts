@@ -1,6 +1,6 @@
 "use client";
 
-import { apiGet, apiPut } from "@/lib/service-client";
+import { apiGet, apiPut, apiPost } from "@/lib/service-client";
 
 // Profile Types
 export interface UserProfile {
@@ -146,10 +146,10 @@ export async function updateUserProfile(data: UpdateProfileRequest): Promise<Api
 
 /**
  * Change current user's password
- * PUT /auth/change-password
+ * POST /auth/change-password
  */
 export async function changePassword(data: ChangePasswordRequest) {
-  return apiPut(
+  return apiPost(
     "/auth/change-password",
     data,
     {},

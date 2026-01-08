@@ -9,43 +9,62 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Loader2, Clock, LogOut, Calendar, TrendingUp, AlertCircle, CheckCircle2 } from "lucide-react";
-import { checkIn, checkOut, getCurrentAttendanceStatus, getAttendanceRecords, getAttendanceReport } from "@/service/attendence";
+import { 
+  markAttendance, 
+  markAbsence,
+  updateAttendance, 
+  getTodayAttendance, 
+  getMyAttendanceRecords, 
+  getCurrentMonthSummary,
+  deleteAttendance,
+  type AttendanceRecord as APIAttendanceRecord,
+  type TodayAttendance,
+  type AttendanceSummary 
+} from "@/service/attendence";
 
 interface AttendanceRecord {
-  id: number;
+  id: string;
   date: string;
   checkInTime?: string;
   checkOutTime?: string;
   duration?: string;
-  status: "present" | "absent" | "late" | "halfday";
+  status: "PRESENT" | "ABSENT" | "LATE" | "HALF_DAY" | "present" | "absent" | "late" | "halfday";
   notes?: string;
+  mood?: string;
 }
 
 interface AttendanceStatus {
-  status: "checkedIn" | "checkedOut";
-  checkInTime?: string;
-  checkOutTime?: string;
-  duration?: string;
+  isMarked: boolean;
+  date: string;
+  attendance?: APIAttendanceRecord;
 }
 
 interface AttendanceReport {
   totalDays: number;
+  workingDays?: number;
+  attendedDays?: number;
   presentDays: number;
   absentDays: number;
-  lateDays: number;
-  halfDays: number;
+  lateDays?: number;
+  halfDays?: number;
   attendancePercentage: number;
   month?: string;
   year?: number;
 }
 
 interface AttendanceClientProps {
-  initialStatus?: AttendanceStatus | null;
+  initialStatus?: TodayAttendance | null;
 }
 
 export default function AttendanceClient({ initialStatus }: AttendanceClientProps) {
   // State management
-  const [currentStatus, setCurrentStatus] = useState<AttendanceStatus | null>(initialStatus || null);
+  const [currentStatus, setCurrentStatus] = useState<AttendanceStatus | null>(
+    initialStatus ? { 
+      isMarked: initialStatus.isMarked, 
+      date: initialStatus.date, 
+      attendance: initialStatus.attendance 
+    } : null
+  );
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [report, setReport] = useState<AttendanceReport | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,11 +93,12 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
   const loadStatus = async () => {
     setStatusLoading(true);
     try {
-      const response = await getCurrentAttendanceStatus();
+      const response = await getTodayAttendance();
       if (response.success && response.data) {
         setCurrentStatus(response.data as AttendanceStatus);
       } else {
-        toast.error(response.message || "Failed to load status");
+        // No attendance for today - not an error
+        setCurrentStatus({ isMarked: false, date: new Date().toISOString().split("T")[0] });
       }
     } catch (err) {
       console.error("Error loading status:", err);
@@ -92,11 +112,21 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
   const loadRecords = async () => {
     setRecordsLoading(true);
     try {
-      const response = await getAttendanceRecords(startDate, endDate);
+      const response = await getMyAttendanceRecords({ startDate, endDate });
       if (response.success && response.data) {
-        setRecords(Array.isArray(response.data) ? response.data : response.data.records || []);
+        const data = response.data;
+        const recordsList = Array.isArray(data) ? data : data.records || [];
+        setRecords(recordsList.map((r: APIAttendanceRecord) => ({
+          id: r.id,
+          date: r.date,
+          checkInTime: r.checkInTime,
+          checkOutTime: r.checkOutTime,
+          status: r.status,
+          notes: r.notes,
+          mood: r.mood,
+        })));
       } else {
-        toast.error(response.message || "Failed to load records");
+        setRecords([]);
       }
     } catch (err) {
       console.error("Error loading records:", err);
@@ -110,11 +140,21 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
   const loadReport = async () => {
     setReportLoading(true);
     try {
-      const response = await getAttendanceReport(startDate, endDate);
+      const response = await getCurrentMonthSummary();
       if (response.success && response.data) {
-        setReport(response.data as AttendanceReport);
+        const summary = response.data.summary as AttendanceSummary;
+        setReport({
+          totalDays: summary.totalDays,
+          workingDays: summary.workingDays,
+          attendedDays: summary.attendedDays,
+          presentDays: summary.attendedDays,
+          absentDays: summary.absentDays,
+          attendancePercentage: summary.attendancePercentage,
+          month: summary.month,
+          year: summary.year,
+        });
       } else {
-        toast.error(response.message || "Failed to load report");
+        setReport(null);
       }
     } catch (err) {
       console.error("Error loading report:", err);
@@ -124,46 +164,52 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
     }
   };
 
-  // Handle check-in
+  // Handle check-in (mark attendance)
   const handleCheckIn = async () => {
     setLoading(true);
     try {
-      const response = await checkIn();
+      const response = await markAttendance({ mood: "HAPPY" });
       if (response.success) {
+        const attendance = response.data?.attendance;
         setCurrentStatus({
-          status: "checkedIn",
-          checkInTime: new Date().toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }),
+          isMarked: true,
+          date: new Date().toISOString().split("T")[0],
+          attendance: attendance,
         });
-        toast.success("Checked in successfully!");
+        toast.success("Attendance marked successfully!");
         loadRecords();
       } else {
-        toast.error(response.message || "Failed to check in");
+        toast.error(response.message || "Failed to mark attendance");
       }
     } catch (err) {
-      console.error("Error checking in:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to check in");
+      console.error("Error marking attendance:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to mark attendance");
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle check-out
+  // Handle check-out (update attendance)
   const handleCheckOut = async () => {
     setLoading(true);
     try {
-      const response = await checkOut();
+      const attendanceId = currentStatus?.attendance?.id;
+      if (!attendanceId) {
+        toast.error("No active attendance found to check out");
+        setLoading(false);
+        return;
+      }
+      
+      const response = await updateAttendance(attendanceId, {
+        checkOutTime: new Date().toISOString(),
+      });
+      
       if (response.success) {
+        const attendance = response.data?.attendance;
         setCurrentStatus({
-          status: "checkedOut",
-          checkOutTime: new Date().toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }),
+          isMarked: true,
+          date: new Date().toISOString().split("T")[0],
+          attendance: attendance,
         });
         toast.success("Checked out successfully!");
         loadRecords();
@@ -178,11 +224,62 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
     }
   };
 
+  // Handle mark absence
+  const handleMarkAbsence = async (date: string, reason: string) => {
+    setLoading(true);
+    try {
+      const response = await markAbsence({ date, reason });
+      if (response.success) {
+        toast.success("Absence marked successfully!");
+        loadRecords();
+        loadReport();
+      } else {
+        toast.error(response.message || "Failed to mark absence");
+      }
+    } catch (err) {
+      console.error("Error marking absence:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to mark absence");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle delete attendance
+  const handleDeleteAttendance = async (date: string) => {
+    if (!confirm("Are you sure you want to delete this attendance record?")) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await deleteAttendance(date);
+      if (response.success) {
+        toast.success("Attendance record deleted!");
+        loadRecords();
+        loadReport();
+        // If deleted today's record, refresh status
+        if (date === new Date().toISOString().split("T")[0]) {
+          loadStatus();
+        }
+      } else {
+        toast.error(response.message || "Failed to delete attendance");
+      }
+    } catch (err) {
+      console.error("Error deleting attendance:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to delete attendance");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle date range update
   const handleUpdateDateRange = () => {
     loadRecords();
     loadReport();
   };
+
+  // Check if user has checked in but not checked out
+  const hasCheckedIn = currentStatus?.isMarked && currentStatus?.attendance && !currentStatus?.attendance?.checkOutTime;
+  const hasCheckedOut = currentStatus?.isMarked && currentStatus?.attendance?.checkOutTime;
 
   return (
     <div className="space-y-6">
@@ -209,7 +306,7 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
-              ) : currentStatus ? (
+              ) : currentStatus?.isMarked && currentStatus?.attendance ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Status Badge */}
@@ -218,50 +315,54 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
                         <div className="text-center">
                           <div className="text-sm text-gray-600 mb-2">Status</div>
                           <div className="text-2xl font-bold text-blue-600 capitalize">
-                            {currentStatus.status === "checkedIn" ? "Checked In" : "Checked Out"}
+                            {hasCheckedOut ? "Checked Out" : "Checked In"}
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     {/* Check-in Time */}
-                    {currentStatus.checkInTime && (
+                    {currentStatus.attendance.checkInTime && (
                       <Card className="bg-gradient-to-br from-green-50 to-green-100">
                         <CardContent className="pt-6">
                           <div className="text-center">
                             <div className="text-sm text-gray-600 mb-2">Check In Time</div>
-                            <div className="text-xl font-mono text-green-600">{currentStatus.checkInTime}</div>
+                            <div className="text-xl font-mono text-green-600">
+                              {new Date(currentStatus.attendance.checkInTime).toLocaleTimeString()}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                     )}
 
                     {/* Check-out Time */}
-                    {currentStatus.checkOutTime && (
+                    {currentStatus.attendance.checkOutTime && (
                       <Card className="bg-gradient-to-br from-orange-50 to-orange-100">
                         <CardContent className="pt-6">
                           <div className="text-center">
                             <div className="text-sm text-gray-600 mb-2">Check Out Time</div>
-                            <div className="text-xl font-mono text-orange-600">{currentStatus.checkOutTime}</div>
+                            <div className="text-xl font-mono text-orange-600">
+                              {new Date(currentStatus.attendance.checkOutTime).toLocaleTimeString()}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                     )}
 
-                    {/* Duration */}
-                    {currentStatus.duration && (
+                    {/* Mood */}
+                    {currentStatus.attendance.mood && (
                       <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
                         <CardContent className="pt-6">
                           <div className="text-center">
-                            <div className="text-sm text-gray-600 mb-2">Duration</div>
-                            <div className="text-xl font-mono text-purple-600">{currentStatus.duration}</div>
+                            <div className="text-sm text-gray-600 mb-2">Mood</div>
+                            <div className="text-xl font-mono text-purple-600 capitalize">{currentStatus.attendance.mood.toLowerCase()}</div>
                           </div>
                         </CardContent>
                       </Card>
                     )}
                   </div>
 
-                  {currentStatus.status === "checkedOut" && (
+                  {hasCheckedOut && (
                     <Alert className="border-green-200 bg-green-50">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <AlertDescription className="text-green-800">
@@ -296,14 +397,14 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button
                   onClick={handleCheckIn}
-                  disabled={loading || (currentStatus?.status === "checkedIn")}
+                  disabled={loading || currentStatus?.isMarked}
                   className="h-24 text-lg font-semibold"
-                  variant={currentStatus?.status === "checkedIn" ? "outline" : "default"}
+                  variant={currentStatus?.isMarked ? "outline" : "default"}
                 >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Checking In...
+                      Marking...
                     </>
                   ) : (
                     <>
@@ -315,9 +416,9 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
 
                 <Button
                   onClick={handleCheckOut}
-                  disabled={loading || (currentStatus?.status === "checkedOut")}
+                  disabled={loading || !hasCheckedIn || !!hasCheckedOut}
                   className="h-24 text-lg font-semibold"
-                  variant={currentStatus?.status === "checkedOut" ? "outline" : "default"}
+                  variant={hasCheckedOut ? "outline" : "default"}
                 >
                   {loading ? (
                     <>
@@ -333,11 +434,13 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
                 </Button>
               </div>
 
-              {currentStatus && (
+              {currentStatus?.isMarked && (
                 <Alert className="mt-4 border-blue-200 bg-blue-50">
                   <AlertCircle className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-blue-800">
-                    Current status: <span className="font-semibold capitalize">{currentStatus.status}</span>
+                    Current status: <span className="font-semibold capitalize">
+                      {hasCheckedOut ? "Checked Out" : hasCheckedIn ? "Checked In" : "Not Marked"}
+                    </span>
                   </AlertDescription>
                 </Alert>
               )}
@@ -434,20 +537,29 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
                             {record.notes && <div>📝 Notes: {record.notes}</div>}
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex flex-col gap-2 items-end">
                           <div
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              record.status === "present"
+                              record.status === "present" || record.status === "PRESENT"
                                 ? "bg-green-100 text-green-800"
-                                : record.status === "absent"
+                                : record.status === "absent" || record.status === "ABSENT"
                                   ? "bg-red-100 text-red-800"
-                                  : record.status === "late"
+                                  : record.status === "late" || record.status === "LATE"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-blue-100 text-blue-800"
                             }`}
                           >
-                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                            {String(record.status).charAt(0).toUpperCase() + String(record.status).slice(1).toLowerCase()}
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteAttendance(record.date)}
+                            disabled={loading}
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -461,6 +573,51 @@ export default function AttendanceClient({ initialStatus }: AttendanceClientProp
                   </AlertDescription>
                 </Alert>
               )}
+
+              {/* Mark Absence Section */}
+              <Card className="mt-4 border-orange-200 bg-orange-50/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm text-orange-800">Mark Absence</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Label htmlFor="absence-date" className="text-sm text-orange-700">Date</Label>
+                      <Input
+                        id="absence-date"
+                        type="date"
+                        className="mt-1 border-orange-200"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label htmlFor="absence-reason" className="text-sm text-orange-700">Reason</Label>
+                      <Input
+                        id="absence-reason"
+                        placeholder="Enter reason..."
+                        className="mt-1 border-orange-200"
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                      onClick={() => {
+                        const dateInput = document.getElementById("absence-date") as HTMLInputElement;
+                        const reasonInput = document.getElementById("absence-reason") as HTMLInputElement;
+                        if (dateInput?.value && reasonInput?.value) {
+                          handleMarkAbsence(dateInput.value, reasonInput.value);
+                          dateInput.value = "";
+                          reasonInput.value = "";
+                        } else {
+                          toast.error("Please enter both date and reason");
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      Mark Absent
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>

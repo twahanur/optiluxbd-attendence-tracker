@@ -196,7 +196,7 @@ export const updateEmployee = async (
   data: Partial<CreateEmployeeRequest>
 ) => {
   return apiPut(
-    `/admin/employees/${id}`,
+    `/users/employees/${id}`,
     data,
     {},
     "Failed to update employee"
@@ -205,7 +205,7 @@ export const updateEmployee = async (
 
 // Delete employee
 export const deleteEmployee = async (id: string) => {
-  return apiDelete(`/admin/employees/${id}`, {}, "Failed to delete employee");
+  return apiDelete(`/users/employees/${id}`, {}, "Failed to delete employee");
 };
 
 // Session Settings
@@ -309,7 +309,7 @@ export const getAllUserSettings = async () => {
 // Reset all user settings to defaults
 export const resetUserSettingsToDefaults = async () => {
   return apiPost(
-    "/admin/user-settings/reset-defaults",
+    "/admin/user-settings/reset",
     {},
     {},
     "Failed to reset user settings to defaults"
