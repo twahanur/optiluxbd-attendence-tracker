@@ -78,10 +78,8 @@ export default function EmailSettings() {
         emailSettingsApi.getAllTemplates(),
       ]);
 
-      console.log('[EmailSettings] SMTP response:', smtpRes);
       
       if (smtpRes.success && smtpRes.data) {
-        console.log('[EmailSettings] Setting SMTP data:', smtpRes.data);
         setSMTPConfig({
           host: smtpRes.data.host,
           port: smtpRes.data.port,
