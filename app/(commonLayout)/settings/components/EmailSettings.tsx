@@ -27,9 +27,9 @@ import { toast } from 'sonner';
 import { 
   emailSettingsApi, 
   SMTPConfig, 
-  EmailTemplate, 
-  EmailTemplates 
+  EmailTemplate
 } from '@/service/admin';
+import Custommail from './Custommail';
 
 export default function EmailSettings() {
   const [loading, setLoading] = useState(true);
@@ -37,6 +37,7 @@ export default function EmailSettings() {
   const [testing, setTesting] = useState(false);
   const [activeTab, setActiveTab] = useState('smtp');
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordModified, setPasswordModified] = useState(false);
 
   // SMTP Configuration State
   const [smtpConfig, setSMTPConfig] = useState<SMTPConfig>({
@@ -85,31 +86,48 @@ export default function EmailSettings() {
           port: smtpRes.data.port,
           secure: smtpRes.data.secure,
           user: smtpRes.data.user,
-          pass: smtpRes.data.pass,
-          from: smtpRes.data.fromEmail || smtpRes.data.from || '',
+          pass: smtpRes.data.pass || '',
+          from: smtpRes.data.from || '',
           isConfigured: true,
         });
       }
       
-      console.log('[EmailSettings] Templates response:', templatesRes);
       
       if (templatesRes.success && templatesRes.data) {
-        console.log('[EmailSettings] Setting templates data:', templatesRes.data);
-        const templatesData = templatesRes.data as Record<string, EmailTemplate>;
+        const templatesData: Record<string, EmailTemplate> = {};
+        
+        // The API returns templates as an object with keys directly in data
+        Object.keys(templatesRes.data).forEach((key) => {
+          const template = templatesRes.data![key];
+          
+          templatesData[key] = {
+            type: key,
+            subject: template.subject || '',
+            htmlBody: template.body || template.htmlBody || '',
+            body: template.body || template.htmlBody || '',
+            textBody: template.textBody || '',
+            variables: template.variables || [],
+          };
+        });
+        
         setTemplates(templatesData);
         
         // Load first available template
         const templateKeys = Object.keys(templatesData);
         if (templateKeys.length > 0) {
           const firstTemplateKey = templateKeys[0];
-          setSelectedTemplate(firstTemplateKey as any);
+          setSelectedTemplate(firstTemplateKey);
           setCurrentTemplate(templatesData[firstTemplateKey] || {
             subject: '',
             htmlBody: '',
             textBody: '',
             variables: [],
           });
+        } else {
+          console.log('[EmailSettings] No templates found');
         }
+      } else {
+        console.log('[EmailSettings] Templates response failed or no data');
       }
     } catch (error) {
       toast.error('Failed to load email settings');
@@ -122,8 +140,15 @@ export default function EmailSettings() {
   const handleSaveSMTP = async () => {
     try {
       setSaving(true);
-      await emailSettingsApi.updateSMTPConfig(smtpConfig);
+      // Only send password if it was modified
+      const configToSend = { ...smtpConfig };
+      if (!passwordModified) {
+        // If password wasn't modified, remove it from the request
+        delete configToSend.pass;
+      }
+      await emailSettingsApi.updateSMTPConfig(configToSend);
       toast.success('SMTP configuration saved successfully');
+      setPasswordModified(false);
       loadEmailSettings(); // Reload to get updated status
     } catch (error) {
       toast.error('Failed to save SMTP configuration');
@@ -173,7 +198,11 @@ export default function EmailSettings() {
 
     try {
       setTesting(true);
-      await emailSettingsApi.sendTestEmail(testEmail);
+      await emailSettingsApi.sendTestEmail({
+        to: testEmail.email,
+        subject: testEmail.subject,
+        message: testEmail.message,
+      });
       toast.success('Test email sent successfully!');
       setTestEmail({ ...testEmail, email: '' });
     } catch (error) {
@@ -217,6 +246,13 @@ export default function EmailSettings() {
         >
           <BookTemplate className="w-4 h-4" />
           <span>Templates</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="customMail"
+          className="flex items-center space-x-2 text-white/80 data-[state=active]:text-white data-[state=active]:border-purple-300/60 data-[state=active]:bg-purple-500/15"
+        >
+          <BookTemplate className="w-4 h-4" />
+          <span>Send Mail</span>
         </TabsTrigger>
         <TabsTrigger
           value="test"
@@ -293,8 +329,11 @@ export default function EmailSettings() {
                   id="smtpPass"
                   type={showPassword ? 'text' : 'password'}
                   value={smtpConfig.pass}
-                  onChange={(e) => setSMTPConfig({ ...smtpConfig, pass: e.target.value })}
-                  placeholder={smtpConfig.pass ? '***hidden***' : 'Your app password'}
+                  onChange={(e) => {
+                    setSMTPConfig({ ...smtpConfig, pass: e.target.value });
+                    setPasswordModified(true);
+                  }}
+                  placeholder={passwordModified ? 'Your app password' : 'Click to enter password'}
                 />
                 <Button
                   type="button"
@@ -434,6 +473,9 @@ export default function EmailSettings() {
             </div>
           </CardContent>
         </Card>
+      </TabsContent>
+      <TabsContent value="customMail" className="space-y-6">
+        <Custommail templates={templates} />
       </TabsContent>
 
       {/* Test & Status Tab */}

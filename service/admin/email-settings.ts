@@ -109,7 +109,7 @@ export interface AllEmailSettings {
  * GET /admin/email-settings/smtp
  */
 export const getSMTPConfig = async () => {
-  return apiGet<{ smtp: SMTPConfig }>(
+  return apiGet<SMTPConfig>(
     "/admin/email-settings/smtp",
     {},
     "Failed to fetch SMTP config"
@@ -119,8 +119,9 @@ export const getSMTPConfig = async () => {
 /**
  * Update SMTP configuration
  * PUT /admin/email-settings/smtp
+ * Note: Password is optional - only send if updating the password
  */
-export const updateSMTPConfig = async (smtpConfig: SMTPConfig) => {
+export const updateSMTPConfig = async (smtpConfig: Partial<SMTPConfig>) => {
   return apiPut(
     "/admin/email-settings/smtp",
     smtpConfig,
@@ -155,7 +156,7 @@ export const testSMTPConnection = async () => {
  * GET /admin/email-settings/templates
  */
 export const getAllTemplates = async () => {
-  return apiGet<{ templates: EmailTemplate[] }>(
+  return apiGet<Record<string, EmailTemplate>>(
     "/admin/email-settings/templates",
     {},
     "Failed to fetch email templates"
@@ -290,6 +291,29 @@ export const getAllEmailSettings = async () => {
   );
 };
 
+export interface SendCustomEmailRequest {
+  userId: string;
+  templateType: string;
+  subject?: string;
+  html?: string;
+  variables?: Record<string, string>;
+}
+
+/**
+ * Send custom email
+ * POST /api/v1/email/send
+ */
+export const sentCustomEmail = async (
+    emailData: SendCustomEmailRequest
+) => {
+  return apiPost(
+    `/admin/email-settings/send`,
+    emailData,
+    {},
+    `Failed to sent email using ${emailData} template`
+  );
+};
+
 // ============================================
 // EXPORT API OBJECT
 // ============================================
@@ -316,4 +340,5 @@ export const emailSettingsApi = {
   getSystemStatus: getEmailSystemStatus,
   sendTestEmail,
   getAllEmailSettings,
+  sentCustomEmail
 };

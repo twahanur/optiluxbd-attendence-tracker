@@ -43,7 +43,6 @@ export default function EmailSettingsManager() {
         setLoading(true);
         setError(null);
         
-        console.log("📧 Fetching email settings...");
         
         const [smtpRes, templatesRes, statusRes] = await Promise.all([
           getSMTPConfig(),
@@ -51,7 +50,6 @@ export default function EmailSettingsManager() {
           getEmailSystemStatus(),
         ]);
         
-        console.log("📊 API Responses:", { smtpRes, templatesRes, statusRes });
 
         if (smtpRes.success && smtpRes.data) {
           setSMTPConfig(smtpRes.data.smtp);
@@ -59,17 +57,14 @@ export default function EmailSettingsManager() {
           setError(smtpRes.message || "Failed to fetch SMTP config");
         }
 
-        console.log("📧 Templates Response:", templatesRes);
         
         if (templatesRes.success && templatesRes.data) {
-          console.log("📧 Raw templates data:", templatesRes.data);
           // Map API response to component format
           const mappedTemplates: Record<string, EmailTemplate> = {};
           Object.entries(templatesRes.data).forEach(([key, value]: [string, any]) => {
             if (key !== 'count' && key !== 'message' && key !== 'success' && value && typeof value === 'object') {
               // Convert snake_case to camelCase
               const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-              console.log(`🔄 Mapping ${key} → ${camelKey}`, value);
               mappedTemplates[camelKey] = {
                 subject: value.subject || '',
                 html: value.htmlBody || value.html || '',
@@ -78,7 +73,6 @@ export default function EmailSettingsManager() {
               };
             }
           });
-          console.log("✅ Mapped templates:", mappedTemplates);
           setTemplates(mappedTemplates);
         }
 
@@ -95,7 +89,6 @@ export default function EmailSettingsManager() {
     fetchData();
   }, []);
 
-  console.log("afeter uise effect")
 
   // Handle SMTP update
   const handleSMTPUpdate = async () => {
@@ -104,7 +97,6 @@ export default function EmailSettingsManager() {
       if (!smtpConfig) return;
 
       const response = await updateSMTPConfig(smtpConfig);
-
       if (response.success) {
         setEditingSMTP(false);
         setSuccessMessage("SMTP configuration updated successfully");

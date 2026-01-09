@@ -34,7 +34,6 @@ async function DashboardContent() {
       getAttendanceChartData(90)
     ]);
     
-    console.log("[DashboardContent] Chart Result:", chartResult);
 
     // Validate statistics response
     if (!statsResult) {
@@ -64,7 +63,6 @@ async function DashboardContent() {
     // Extract chart data if available
     if (chartResult.success && chartResult.data) {
       chartData = chartResult.data;
-      console.log("[DashboardContent] Chart data loaded:", chartData.length, "days");
     } else {
       console.warn("[DashboardContent] Chart data not available, using demo data");
     }

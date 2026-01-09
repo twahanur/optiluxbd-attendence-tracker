@@ -19,8 +19,6 @@ export default function EmailTemplatesTab({
   setTemplates,
   onTemplateUpdate,
 }: EmailTemplatesTabProps) {
-    console.log("templates is called")
-    console.log(templates)
   return (
     <TabsContent value="templates">
       <div className="space-y-4">
